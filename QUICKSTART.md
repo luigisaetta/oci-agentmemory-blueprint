@@ -87,3 +87,23 @@ It prints only the non-sensitive `DB_USER`, `DB_DSN`, and `WALLET_DIR` values. I
 | `0` | The ADB connection and validation query succeeded. |
 | `1` | The connection or validation query failed. Check credentials, wallet path, DSN, and network access. |
 | `2` | Required variables are missing or blank in `.env`. |
+
+## Initialise the Agent Memory store
+
+Example 01 verifies that Oracle Agent Memory can initialise its ADB-backed
+store. In addition to the `.env` settings above, it reads the default OCI
+profile from `~/.oci/config`. That profile must include the standard `user`,
+`fingerprint`, `tenancy`, `region`, and `key_file` settings, plus the target
+`compartment_id` used by OCI Generative AI.
+
+Run the example from the repository root:
+
+```bash
+python examples/example01/example01.py
+```
+
+The example creates the configured memory store with the `OAM_` store ID and
+creates any required schema objects. It does not store conversation content or
+other memories. The ADB connection pool is closed before the command exits.
+Configuration and startup errors report only their error type; credentials,
+wallet passwords, and private-key contents are never printed.
