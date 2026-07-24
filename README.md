@@ -11,6 +11,11 @@ This repository is a practical blueprint for adopting **Oracle Agent Memory**, b
 
 The goal is simple: help teams move from a stateless proof of concept to agents that can retain context, learn useful preferences, and retrieve relevant knowledge without turning memory into an opaque or risky subsystem.
 
+## Quick Start
+
+Start with the [Quick Start](QUICKSTART.md) to configure a local ADB wallet,
+the required `.env` settings, and the OCI profile used by the examples.
+
 ## Why agent memory matters
 
 Large language models are powerful within a single interaction, but they do not automatically retain the context that makes an agent genuinely useful over time. Enterprise agents often need to remember a conversation, a user preference, an unresolved task, or a validated fact while keeping data isolated, traceable, and governed.
@@ -31,6 +36,13 @@ The repository is being built as a set of progressive, self-contained examples. 
 
 Each example will explain its use case, architecture, configuration, expected behaviour, and the trade-offs behind its memory strategy.
 
+## Examples
+
+| Example | Description |
+| --- | --- |
+| [Example 01: Asynchronous Thread Messages](examples/example01/README.md) | Creates an ADB-backed Oracle Agent Memory store, creates a thread, appends sample messages asynchronously, and explains background memory extraction. |
+| [ADB connection check](examples/test_adb_connections/test_db_connection.py) | Validates the local wallet-based ADB configuration with `SELECT 1 FROM dual` before running a memory example. |
+
 ## Who this is for
 
 This blueprint is intended for AI application developers, solution architects, and platform teams building agents on Oracle Cloud Infrastructure. It is especially useful if you want a concrete starting point for memory-enabled agents while retaining control over where memory is stored and how it is used.
@@ -45,7 +57,9 @@ This blueprint is intended for AI application developers, solution architects, a
 
 ## Repository status
 
-This is the foundation of the blueprint. The first working examples, setup instructions, and reference architecture will be added incrementally. Until then, this README establishes the scope and design principles that guide the repository.
+The blueprint currently includes a local ADB connection check and the first
+Oracle Agent Memory thread example. Additional examples and production patterns
+will be added incrementally.
 
 ## Contributing
 
