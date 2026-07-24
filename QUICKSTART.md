@@ -75,7 +75,7 @@ Activate the project Conda environment and run the first example from the reposi
 
 ```bash
 conda activate oci-agentmemory-blueprint
-python examples/example01_adb_connection/test_db_connection.py
+python examples/test_adb_connections/test_db_connection.py
 ```
 
 The utility loads the repository-root `.env`, establishes a wallet-based connection with `oracledb`, and executes `SELECT 1 FROM dual`.

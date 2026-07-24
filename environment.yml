@@ -8,6 +8,7 @@ dependencies:
   - pip
   - pip:
       # Runtime dependencies
+      - oci
       - oracledb
       - oracleagentmemory==26.6.0
       - python-dotenv
