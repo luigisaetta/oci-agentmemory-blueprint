@@ -1,2 +1,51 @@
-# oci-agentmemory-blueprint
-This repository will contain a set of example to help start in using Oracle ASgent Memory (backed by Oracle ADB)
+# Oracle Agent Memory Blueprint for Oracle ADB
+
+Build AI agents that remember the right things, for the right length of time, in the right scope.
+
+This repository is a practical blueprint for adopting **Oracle Agent Memory**, backed by **Oracle Autonomous Database (ADB)**. It collects focused examples, reusable patterns, and implementation guidance for adding durable short-term and long-term memory to enterprise AI agents.
+
+The goal is simple: help teams move from a stateless proof of concept to agents that can retain context, learn useful preferences, and retrieve relevant knowledge without turning memory into an opaque or risky subsystem.
+
+## Why agent memory matters
+
+Large language models are powerful within a single interaction, but they do not automatically retain the context that makes an agent genuinely useful over time. Enterprise agents often need to remember a conversation, a user preference, an unresolved task, or a validated fact while keeping data isolated, traceable, and governed.
+
+Oracle Agent Memory and Oracle ADB provide a foundation for persisting and retrieving that information outside the model. This blueprint shows how to apply that capability deliberately, with clear memory boundaries and production-minded practices.
+
+## What you will find here
+
+The repository is being built as a set of progressive, self-contained examples. It will cover:
+
+* **Short-term memory** — retain working context across turns or agent executions.
+* **Long-term memory** — store and retrieve durable user preferences, facts, and learned context.
+* **Memory design patterns** — decide what to remember, when to retrieve it, and when it should expire.
+* **Oracle ADB integration** — use Autonomous Database as the external store for enterprise-grade persistence.
+* **Isolation and governance** — design for users, sessions, tenants, sensitive data, retention, and deletion.
+* **Testing and operations** — validate memory behaviour and handle failures without requiring live cloud resources for unit tests.
+* **Production guidance** — configuration, security, observability, and deployment considerations for OCI.
+
+Each example will explain its use case, architecture, configuration, expected behaviour, and the trade-offs behind its memory strategy.
+
+## Who this is for
+
+This blueprint is intended for AI application developers, solution architects, and platform teams building agents on Oracle Cloud Infrastructure. It is especially useful if you want a concrete starting point for memory-enabled agents while retaining control over where memory is stored and how it is used.
+
+## Guiding principles
+
+* **Memory is intentional.** Store only information that provides a clear future benefit.
+* **Scope is explicit.** Separate session, user, tenant, and application memory to prevent leakage.
+* **Retrieval is selective.** Bring back relevant context instead of indiscriminately injecting history into every prompt.
+* **Data is governed.** Treat stored agent memory as enterprise data, with retention, deletion, and security requirements.
+* **Examples stay practical.** Every pattern should be easy to understand, test, adapt, and operate.
+
+## Repository status
+
+This is the foundation of the blueprint. The first working examples, setup instructions, and reference architecture will be added incrementally. Until then, this README establishes the scope and design principles that guide the repository.
+
+## Contributing
+
+Contributions should strengthen the adoption path for Oracle Agent Memory with Oracle ADB. Before adding an example or feature, review [AGENTS.md](AGENTS.md) for the repository conventions, documentation expectations, security requirements, and testing standards.
+
+## License
+
+This project is released under the [MIT License](LICENSE).
