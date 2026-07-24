@@ -1,5 +1,10 @@
 # Oracle Agent Memory Blueprint for Oracle ADB
 
+[![Code style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Linting: Pylint](https://img.shields.io/badge/linting-pylint-yellowgreen)](https://pylint.readthedocs.io/)
+[![Tests: pytest](https://img.shields.io/badge/tests-pytest-0A9EDC)](https://docs.pytest.org/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+
 Build AI agents that remember the right things, for the right length of time, in the right scope.
 
 This repository is a practical blueprint for adopting **Oracle Agent Memory**, backed by **Oracle Autonomous Database (ADB)**. It collects focused examples, reusable patterns, and implementation guidance for adding durable short-term and long-term memory to enterprise AI agents.
