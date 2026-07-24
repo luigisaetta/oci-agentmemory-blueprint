@@ -99,7 +99,7 @@ profile from `~/.oci/config`. That profile must include the standard `user`,
 Run the example from the repository root:
 
 ```bash
-python examples/example01/example01.py
+python -m examples.example01.example01
 ```
 
 The example creates the configured memory store with the `OAM_` store ID and

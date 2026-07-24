@@ -11,8 +11,9 @@ change the configured models.
 
 * Importing the module must not read local configuration, open an ADB pool, call
   OCI, or create database objects.
-* Running the module loads and validates the required ADB settings from the
-  repository-root `.env` file.
+* Shared helpers in `common.py` load and validate the required ADB settings
+  from the repository-root `.env` file and create the ADB connection pool
+  directly with `oracledb.create_pool`.
 * The OCI configuration path must expand `~` before it is passed to the OCI SDK.
 * The example must require the OCI settings used to initialise the embedder and
   LLM, including `compartment_id`.

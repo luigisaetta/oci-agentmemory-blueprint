@@ -38,6 +38,8 @@ When working in this repository, Codex should:
 
 * Inspect the existing project structure before editing.
 * Prefer small, coherent changes over broad rewrites.
+* Write code that a human can read, understand, and maintain; prefer clear,
+  direct control flow over unnecessary abstraction.
 * Reuse existing modules, helpers, configuration patterns, and test fixtures before adding new ones.
 * Preserve user changes already present in the working tree.
 * Avoid speculative changes that are not requested by the user or required by the specification.
