@@ -5,12 +5,11 @@ License: MIT
 Description: Unit tests for the Oracle Agent Memory startup example.
 """
 
-import asyncio
 import importlib.util
 from datetime import datetime
 import logging
 from pathlib import Path
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import Mock
 
 import pytest
 
@@ -53,26 +52,21 @@ def test_main_closes_pool_on_success_and_failure(
     """Close the pool regardless of the memory-store startup result."""
     connection_pool = Mock()
     memory = Mock()
-    memory.create_thread.return_value.add_messages_async = AsyncMock(
-        return_value=[
-            "message-1",
-            "message-2",
-        ]
-    )
+    memory.create_thread.return_value.add_messages.return_value = [
+        "message-1",
+        "message-2",
+    ]
     monkeypatch.setattr(example01, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example01, "load_oci_settings", lambda: VALID_OCI_SETTINGS)
     monkeypatch.setattr(example01, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example01.LOGGER.name)
 
-    assert asyncio.run(example01.main()) == 0
+    assert example01.main() == 0
     connection_pool.close.assert_called_once_with()
     assert "Successfully connected" in caplog.text
     assert "Created thread:" in caplog.text
-    assert "Queued 2 messages for asynchronous insertion" in caplog.text
     assert "thread_id" not in memory.create_thread.call_args.kwargs
-    added_messages = (
-        memory.create_thread.return_value.add_messages_async.call_args.args[0]
-    )
+    added_messages = memory.create_thread.return_value.add_messages.call_args.args[0]
     timestamps = [added_messages[0].timestamp, added_messages[1]["timestamp"]]
     assert timestamps[0] == timestamps[1]
     assert timestamps[0].endswith("Z")
@@ -84,7 +78,7 @@ def test_main_closes_pool_on_success_and_failure(
         "create_memory_store",
         Mock(side_effect=RuntimeError("sensitive detail")),
     )
-    assert asyncio.run(example01.main()) == 1
+    assert example01.main() == 1
     connection_pool.close.assert_called_once_with()
     assert "RuntimeError: sensitive detail" in caplog.text
 
@@ -95,18 +89,16 @@ def test_main_explains_value_errors_when_adding_messages(
     """Explain how to correct Agent Memory input validation failures."""
     connection_pool = Mock()
     memory = Mock()
-    memory.create_thread.return_value.add_messages_async = AsyncMock(
-        side_effect=ValueError()
-    )
+    memory.create_thread.return_value.add_messages.side_effect = ValueError()
     monkeypatch.setattr(example01, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example01, "load_oci_settings", lambda: VALID_OCI_SETTINGS)
     monkeypatch.setattr(example01, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example01.LOGGER.name)
 
-    assert asyncio.run(example01.main()) == 1
+    assert example01.main() == 1
 
-    assert "rejected the example messages" in caplog.text
-    assert "supported role and non-empty content" in caplog.text
+    assert "rejected an invalid value" in caplog.text
+    assert "thread-message input" in caplog.text
     assert "Stack trace:" in caplog.text
     connection_pool.close.assert_called_once_with()
 
@@ -123,7 +115,7 @@ def test_main_explains_thread_id_collision_errors(
     monkeypatch.setattr(example01, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example01.LOGGER.name)
 
-    assert asyncio.run(example01.main()) == 1
+    assert example01.main() == 1
 
-    assert "Verify the thread, user, and agent identifiers" in caplog.text
+    assert "rejected an invalid value" in caplog.text
     connection_pool.close.assert_called_once_with()

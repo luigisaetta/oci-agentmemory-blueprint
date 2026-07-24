@@ -5,7 +5,6 @@ License: MIT
 Description: Creates an Oracle Agent Memory store backed by Oracle ADB.
 """
 
-import asyncio
 from datetime import datetime, timezone
 import logging
 from pathlib import Path
@@ -64,7 +63,7 @@ def create_memory_store(
     )
 
 
-async def main() -> int:
+def main() -> int:
     """Create the memory store and close the ADB connection pool.
 
     Returns:
@@ -76,17 +75,14 @@ async def main() -> int:
         datefmt="%Y-%m-%dT%H:%M:%S",
     )
     connection_pool: oracledb.ConnectionPool | None = None
-    stage = "Creating the ADB connection pool"
     try:
         LOGGER.info("--------- Setup ---------")
         connection_pool = create_connection_pool()
         LOGGER.info("Created connection pool...")
 
-        stage = "initialising the Agent Memory store"
         memory = create_memory_store(connection_pool, load_oci_settings())
         LOGGER.info("Successfully connected to Agent Memory...")
 
-        stage = "creating the example thread"
         thread = memory.create_thread(
             user_id="user_123",
             agent_id="agent_456",
@@ -96,10 +92,10 @@ async def main() -> int:
         LOGGER.info("")
 
         LOGGER.info("------ Adding msgs ------")
-        stage = "adding example messages to the thread"
         inserted_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
         messages = [
+            # can use Message or a dict
             Message(
                 role="user",
                 content="I prefer window seats on flights.",
@@ -111,8 +107,7 @@ async def main() -> int:
                 "timestamp": inserted_at,
             },
         ]
-        LOGGER.info("Queued %d messages for asynchronous insertion.", len(messages))
-        message_ids = await thread.add_messages_async(messages)
+        message_ids = thread.add_messages(messages)
         LOGGER.info("Added %d messages to the thread: %s", len(messages), message_ids)
         LOGGER.info("-------- End --------")
 
@@ -121,32 +116,16 @@ async def main() -> int:
         LOGGER.error("Stack trace:", exc_info=True)
         return 1
     except ValueError:
-        if stage == "creating the example thread":
-            LOGGER.error(
-                "Agent Memory could not create the example thread. "
-                "Verify the thread, user, and agent identifiers."
-            )
-            LOGGER.error("Stack trace:", exc_info=True)
-            return 1
-        if stage == "adding example messages to the thread":
-            LOGGER.error(
-                "Agent Memory rejected the example messages. Verify that each "
-                "message has a supported role and non-empty content."
-            )
-            LOGGER.error("Stack trace:", exc_info=True)
-            return 1
-        LOGGER.info(
-            "Agent Memory rejected a value while %s. "
-            "Verify the local ADB and OCI configuration.",
-            stage,
+        LOGGER.error(
+            "Agent Memory rejected an invalid value. Check the local ADB and "
+            "OCI configuration and the thread-message input."
         )
         LOGGER.error("Stack trace:", exc_info=True)
         return 1
     except Exception as error:  # OCI and database SDKs expose several error types.
         LOGGER.error(
-            "Agent Memory failed while %s (%s). "
+            "Agent Memory execution failed (%s). "
             "Check the local ADB and OCI configuration.",
-            stage,
             type(error).__name__,
         )
         LOGGER.error("Stack trace:", exc_info=True)
@@ -159,4 +138,4 @@ async def main() -> int:
 
 
 if __name__ == "__main__":
-    raise SystemExit(asyncio.run(main()))
+    raise SystemExit(main())

@@ -1,4 +1,4 @@
-# Example 01: Asynchronous Thread Messages
+# Example 01: Create a Memory Client and Add Thread Messages
 
 ## Run the example
 
@@ -11,47 +11,50 @@ conda activate oci-agentmemory-blueprint
 python -m examples.example01.example01
 ```
 
-The command creates an Oracle Agent Memory store backed by Oracle ADB, creates
-a thread, and appends two sample messages. Oracle Agent Memory generates the
-thread ID and the example logs it. The message timestamp is generated in UTC
-immediately before the insert.
+The command creates an Oracle Agent Memory client backed by Oracle ADB, creates
+a thread, and adds two sample messages. Oracle Agent Memory generates the
+thread ID and the example logs it. Both messages receive the UTC timestamp
+generated immediately before insertion.
 
-## What the example demonstrates
+## What the example shows
 
-The example keeps the ADB and OCI configuration boundary in
-[`common.py`](../../common.py). It then configures Oracle Agent Memory with an
-OCI embedder and LLM, creates a thread for one user and agent, and appends a
-user preference and an assistant acknowledgement.
+Example 01 is a small end-to-end starting point for using Oracle Agent Memory.
+It demonstrates three steps:
 
-The thread-message write uses `add_messages_async`. The application logs that
-the messages have been queued immediately before awaiting their result. The
-example awaits the result before closing the ADB connection pool; this is
-required for a short-lived command-line program to avoid cancelling the write.
+1. **Create an Agent Memory client.** `create_memory_store` creates
+   `OracleAgentMemory` with an ADB connection pool, an OCI embedder, an OCI LLM,
+   and the `OAM_` memory-store ID. The ADB and OCI configuration helpers are in
+   [`common.py`](../../common.py) so future examples can reuse them.
+2. **Create a thread.** `memory.create_thread` creates a conversation boundary
+   for `user_123` and `agent_456`. Oracle Agent Memory generates the thread ID;
+   the example records it in the log for later retrieval or inspection.
+3. **Add messages.** `thread.add_messages` appends a user preference and an
+   assistant acknowledgement, then logs the persisted message IDs. The example
+   uses the synchronous API because this short-lived command has no independent
+   work to perform before it closes the ADB connection pool.
 
-## Reading the logs
+## Read the logs
 
-With the example logger at `INFO`, the output shows both application milestones
-and internal Oracle Agent Memory operations. A typical sequence is:
+At `INFO` level, the application and Oracle Agent Memory components expose the
+execution sequence. A typical run contains:
 
-1. `Created connection pool` — the wallet-based ADB pool is available.
-2. `Successfully connected to Agent Memory` and `Created thread` — the memory
-   store and its conversation boundary are ready.
-3. `Queued 2 messages for asynchronous insertion` — the application is about
-   to await the asynchronous write; the final write has not completed yet.
-4. Oracle Agent Memory loggers report operations such as LLM generation,
-   embedding, search, and database writes. These entries identify the internal
-   component that completed each step.
-5. `Added 2 messages to the thread` — the asynchronous write returned the
+1. `Created connection pool` — the wallet-based ADB pool is ready.
+2. `Successfully connected to Agent Memory` — the `OracleAgentMemory` client
+   is configured and the persistence boundary is available.
+3. `Created thread: ...` — the conversation state has a server-generated ID.
+4. Internal loggers may report LLM generation, embeddings, searches, and ADB
+   writes as those operations complete.
+5. `Added 2 messages to the thread: ...` — the append completed and returned
    persisted message IDs.
 
 The exact internal log sequence depends on the SDK version, configured models,
-and whether a memory extraction is due for the thread. Never copy exception
-stack traces, OCI details, wallet paths, or database details into shared logs
-or tickets.
+and whether memory extraction is due. Treat exception stack traces and OCI or
+database details as sensitive diagnostic output; do not copy them to shared
+logs or tickets.
 
-## Why memory extraction runs in the background
+## Asynchronous memory extraction
 
-The example enables automatic extraction and configures:
+The example enables automatic long-term-memory extraction in background mode:
 
 ```python
 MemoryExtractionConfig(
@@ -60,21 +63,17 @@ MemoryExtractionConfig(
 )
 ```
 
-Extracting long-term memories may require LLM calls, embedding requests, vector
-searches, and additional ADB writes. Running that work inline can make a thread
-append take several seconds, even when the raw conversation message has already
-been accepted. Background extraction lets the append return after the raw write
-is complete and performs due extraction work separately.
-
-This trade-off is deliberate:
+Extraction can require LLM generation, embedding, vector search, and further
+ADB writes. Background mode keeps that derived-memory work off the critical
+path after the raw thread messages are persisted.
 
 | Benefit | Trade-off |
 | --- | --- |
-| Faster response after the raw thread message is persisted. | Extracted memories can appear later than the source message. |
-| Lower latency for an interactive agent turn. | A query immediately after the append can observe stale derived memory. |
-| Expensive LLM and embedding work is not on the critical message-write path. | If the background task cannot be scheduled or the process stops, extraction can be delayed or may not complete. |
+| Lower latency after the raw messages are stored. | Extracted memories can appear later than their source messages. |
+| Better responsiveness for interactive agent turns. | A retrieval immediately after append can observe stale derived memory. |
+| LLM and embedding work does not hold up the raw message append. | If background work cannot be scheduled or the process stops, extraction can be delayed or may not complete. |
 
-For a production service, keep the process alive long enough to supervise
-background work and monitor failures. For workflows that require a newly
-extracted memory immediately, use inline extraction or explicitly wait for the
-required processing before retrieving memory.
+For a production service, keep the process alive long enough to monitor
+background work and handle failures. If a workflow must use an extracted memory
+immediately, configure inline extraction or wait for the required processing
+before retrieving memory.

@@ -40,7 +40,7 @@ Each example will explain its use case, architecture, configuration, expected be
 
 | Example | Description |
 | --- | --- |
-| [Example 01: Asynchronous Thread Messages](examples/example01/README.md) | Creates an ADB-backed Oracle Agent Memory store, creates a thread, appends sample messages asynchronously, and explains background memory extraction. |
+| [Example 01: Create a Memory Client and Add Thread Messages](examples/example01/README.md) | Creates an ADB-backed Agent Memory client, creates a thread, appends sample messages, and explains background memory extraction. |
 | [ADB connection check](examples/test_adb_connections/test_db_connection.py) | Validates the local wallet-based ADB configuration with `SELECT 1 FROM dual` before running a memory example. |
 
 ## Who this is for

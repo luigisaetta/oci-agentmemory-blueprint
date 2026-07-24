@@ -106,12 +106,12 @@ The example creates the configured memory store with the `OAM_` store ID and
 creates any required schema objects. It creates a named thread and stores two
 sample messages in it, including a user preference. The ADB connection pool is
 closed before the command exits. Every run lets Oracle Agent Memory generate
-and report a new thread ID. A validation error explains the failing stage and
-the required message fields. Both sample messages receive the current UTC
+and report a new thread ID. A validation error reports invalid configuration or
+thread-message input and includes a stack trace. Both sample messages receive the current UTC
 insertion timestamp. Failures also log a complete traceback for local
 debugging. Treat this diagnostic output as sensitive and do not include it in
 logs, tickets, or source control.
 
-Message insertion uses the asynchronous Agent Memory API. The example logs
-that the messages were queued immediately before awaiting the write result and
-closing the ADB connection pool.
+Message insertion uses the synchronous Agent Memory API. Automatic memory
+extraction still runs in the background, so derived memories can be available
+after the source thread messages are stored.

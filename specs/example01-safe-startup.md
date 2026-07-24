@@ -30,12 +30,12 @@ does not change the configured models.
   failure.
 * No password, wallet password, or private-key content is printed.
 * Each run lets Oracle Agent Memory generate a thread ID and reports it after
-  success. A `ValueError` identifies invalid thread identifiers or example
-  message fields, without printing stored values.
+  success. A `ValueError` reports invalid configuration or thread-message input
+  without printing stored values.
 * The sample messages use the UTC timestamp generated immediately before their
   insertion.
-* The example logs when asynchronous message insertion is queued, then awaits
-  completion before closing the ADB connection pool.
+* The example appends the sample messages before closing the ADB connection
+  pool.
 * Automatic memory extraction runs in background mode. Raw thread messages are
   persisted before due derived-memory extraction completes.
 * Each startup failure logs a concise status message and its complete Python
