@@ -41,6 +41,8 @@ When working in this repository, Codex should:
 * Write code that a human can read, understand, and maintain; prefer clear,
   direct control flow over unnecessary abstraction.
 * Reuse existing modules, helpers, configuration patterns, and test fixtures before adding new ones.
+* Reuse functions from `common.py` whenever they cover the required shared ADB
+  or OCI configuration behaviour.
 * Preserve user changes already present in the working tree.
 * Avoid speculative changes that are not requested by the user or required by the specification.
 * Do not create commits unless explicitly asked.
