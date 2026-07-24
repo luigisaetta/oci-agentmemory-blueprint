@@ -67,4 +67,23 @@ Do not use the `ADMIN` account for the application connection. Create and grant 
 
 > The wallet, `.env`, database password, and wallet password are sensitive. Do not commit them, include them in logs, or share them in issue reports.
 
-The first runnable example will add a connection-verification command to this guide.
+Continue with the connection-verification example below once these settings are in place.
+
+## Test the ADB connection
+
+Activate the project Conda environment and run the first example from the repository root:
+
+```bash
+conda activate oci-agentmemory-blueprint
+python examples/example01_adb_connection/test_db_connection.py
+```
+
+The utility loads the repository-root `.env`, establishes a wallet-based connection with `oracledb`, and executes `SELECT 1 FROM dual`.
+
+It prints only the non-sensitive `DB_USER`, `DB_DSN`, and `WALLET_DIR` values. It never prints `DB_PWD` or `WALLET_PWD`.
+
+| Exit code | Meaning |
+| --- | --- |
+| `0` | The ADB connection and validation query succeeded. |
+| `1` | The connection or validation query failed. Check credentials, wallet path, DSN, and network access. |
+| `2` | Required variables are missing or blank in `.env`. |

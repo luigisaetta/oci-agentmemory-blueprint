@@ -7,5 +7,12 @@ dependencies:
   - python=3.11
   - pip
   - pip:
+      # Runtime dependencies
       - oracledb
       - oracleagentmemory==26.6.0
+      - python-dotenv
+      # Development and quality tools
+      - pytest
+      - pytest-cov
+      - black
+      - pylint
