@@ -4,8 +4,19 @@ All notable changes to this project are documented in this file.
 
 ## Unreleased
 
+### Added
+
+* Reworked the Example 02 documentation around generating a compact Context
+  Card from a stored conversation and preparing it for a subsequent LLM turn.
+* Added Example 02, which persists a ten-message English customer-support
+  conversation in an Oracle Agent Memory thread backed by Oracle ADB.
+* Added specification, documentation, and unit tests for the Example 02
+  conversation persistence behaviour.
+
 ### Changed
 
+* Moved the Example 02 customer-support message construction into a dedicated
+  local module to improve the readability of its persistence flow.
 * Made the Oracle Agent Memory connection example safe to import and improved
   its local configuration validation and shutdown behaviour.
 * Simplified the example startup flow by creating the ADB connection pool
