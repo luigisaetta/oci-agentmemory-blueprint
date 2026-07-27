@@ -115,3 +115,20 @@ logs, tickets, or source control.
 Message insertion uses the synchronous Agent Memory API. Automatic memory
 extraction still runs in the background, so derived memories can be available
 after the source thread messages are stored.
+
+## Use OCI Resource Principal authentication
+
+Example 03 uses OCI Resource Principal authentication for its OCI Generative AI
+LLM and embedding calls. In addition to the ADB variables, set the following
+non-secret values in `.env` or as process environment variables:
+
+| Variable | Description | Safe example |
+| --- | --- | --- |
+| `GENAI_COMPARTMENT_ID` | Compartment authorising OCI Generative AI inference. | `ocid1.compartment.oc1..example` |
+| `GENAI_REGION` | Region hosting the OCI Generative AI endpoint. | `eu-frankfurt-1` |
+
+Do not configure an OCI API key or an OCI profile for this example. It must run
+in an OCI-managed environment with Resource Principal support, a dynamic group
+that includes the executing resource, and permission to use Generative AI in
+the selected compartment. See [Example 03](examples/example03/README.md) for
+the IAM policy and OCI Data Science Notebook Session setup.

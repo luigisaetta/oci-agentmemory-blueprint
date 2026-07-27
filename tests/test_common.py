@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-24
+Date last modified: 2026-07-27
 License: MIT
 Description: Unit tests for shared ADB and OCI configuration helpers.
 """
@@ -31,6 +31,10 @@ VALID_OCI_SETTINGS = {
     "fingerprint": "00:11:22:33",
     "tenancy": "ocid1.tenancy.oc1..example",
     "key_file": "~/.oci/oci_api_key.pem",
+}
+VALID_RESOURCE_PRINCIPAL_SETTINGS = {
+    "GENAI_COMPARTMENT_ID": "ocid1.compartment.oc1..example",
+    "GENAI_REGION": "eu-frankfurt-1",
 }
 
 
@@ -97,3 +101,23 @@ def test_load_oci_settings_expands_path_and_validates_profile(
     )
     with pytest.raises(common.ConfigurationError, match="compartment_id"):
         common.load_oci_settings()
+
+
+def test_load_resource_principal_settings_prefers_environment(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Load non-secret OCI settings without an OCI API-key profile."""
+    monkeypatch.setattr(
+        common, "dotenv_values", Mock(return_value=VALID_RESOURCE_PRINCIPAL_SETTINGS)
+    )
+    monkeypatch.setenv("GENAI_REGION", "us-chicago-1")
+
+    assert common.load_resource_principal_settings() == {
+        "compartment_id": "ocid1.compartment.oc1..example",
+        "region": "us-chicago-1",
+    }
+
+    monkeypatch.delenv("GENAI_REGION")
+    monkeypatch.setattr(common, "dotenv_values", Mock(return_value={}))
+    with pytest.raises(common.ConfigurationError, match="GENAI_COMPARTMENT_ID"):
+        common.load_resource_principal_settings()

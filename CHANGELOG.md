@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+* Added Example 03, which authenticates OCI Generative AI model calls through
+  an OCI Resource Principal while persisting Agent Memory in ADB.
+* Added Resource Principal configuration helpers, documentation, specification,
+  and unit tests, including OCI Data Science Notebook Session guidance.
 * Reworked the Example 02 documentation around generating a compact Context
   Card from a stored conversation and preparing it for a subsequent LLM turn.
 * Added Example 02, which persists a ten-message English customer-support

@@ -1,10 +1,11 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-24
+Date last modified: 2026-07-27
 License: MIT
 Description: Shared local OCI and Oracle Autonomous Database configuration helpers.
 """
 
+import os
 from pathlib import Path
 
 import oracledb
@@ -30,6 +31,10 @@ REQUIRED_OCI_SETTINGS = (
     "fingerprint",
     "tenancy",
     "key_file",
+)
+REQUIRED_RESOURCE_PRINCIPAL_SETTINGS = (
+    "GENAI_COMPARTMENT_ID",
+    "GENAI_REGION",
 )
 
 
@@ -104,3 +109,32 @@ def load_oci_settings() -> dict[str, str]:
             "Missing required OCI settings: " + ", ".join(missing_settings)
         )
     return {name: config[name] for name in REQUIRED_OCI_SETTINGS}
+
+
+def load_resource_principal_settings() -> dict[str, str]:
+    """Load OCI Generative AI settings for Resource Principal authentication.
+
+    Process environment variables take precedence over repository-root `.env`
+    values so OCI-managed runtimes can supply deployment configuration.
+
+    Returns:
+        The compartment ID and region required by OCI Generative AI providers.
+
+    Raises:
+        ConfigurationError: If the compartment ID or region is missing.
+    """
+    environment = dotenv_values(ENV_FILE)
+    settings = {
+        name: os.environ.get(name) or environment.get(name) or ""
+        for name in REQUIRED_RESOURCE_PRINCIPAL_SETTINGS
+    }
+    missing_settings = [name for name, value in settings.items() if not value.strip()]
+    if missing_settings:
+        raise ConfigurationError(
+            "Missing required Resource Principal settings: "
+            + ", ".join(missing_settings)
+        )
+    return {
+        "compartment_id": settings["GENAI_COMPARTMENT_ID"],
+        "region": settings["GENAI_REGION"],
+    }

@@ -42,6 +42,7 @@ Each example will explain its use case, architecture, configuration, expected be
 | --- | --- |
 | [Example 01: Create a Memory Client and Add Thread Messages](examples/example01/README.md) | Creates an ADB-backed Agent Memory client, creates a thread, appends sample messages, and explains background memory extraction. |
 | [Example 02: Build a Context Card from a Stored Conversation](examples/example02/README.md) | Persists a customer-support thread, retrieves its compact Context Card, and prepares it for a subsequent LLM turn. |
+| [Example 03: Use Resource Principal with Oracle Agent Memory](examples/example03/README.md) | Uses OCI Resource Principal authentication for OCI Generative AI while retaining ADB-backed memory persistence. |
 | [ADB connection check](examples/test_adb_connections/test_db_connection.py) | Validates the local wallet-based ADB configuration with `SELECT 1 FROM dual` before running a memory example. |
 
 ## Who this is for
