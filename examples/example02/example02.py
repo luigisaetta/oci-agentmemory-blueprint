@@ -78,6 +78,7 @@ def main() -> int:
         connection_pool = create_connection_pool()
         LOGGER.info("Created connection pool.")
 
+        # create the memory store
         memory = create_memory_store(connection_pool, load_oci_settings())
         LOGGER.info("Successfully connected to Agent Memory.")
         thread = memory.create_thread(
