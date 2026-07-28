@@ -26,7 +26,7 @@ from examples.example05.messages import build_user1_messages, build_user2_messag
 EMBEDDING_MODEL_ID = "oci/cohere.embed-multilingual-v3.0"
 QUERY = "delivery delay tracking update"
 AGENT_ID = "support_agent"
-MAX_RESULTS = 10
+MAX_RESULTS = 5
 LOGGER = logging.getLogger(__name__)
 
 

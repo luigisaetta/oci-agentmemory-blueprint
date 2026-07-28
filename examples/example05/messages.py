@@ -21,14 +21,18 @@ def build_user1_messages(timestamp: str) -> list[Message]:
         ("user", "My delivery for order 1001 is delayed. I need a tracking update."),
         (
             "assistant",
-            "I am sorry about the delivery delay. I will check the tracking status.",
+            "I am sorry about the delivery delay for order 1001. I will check the tracking status.",
         ),
         ("user", "Please confirm when the delayed package will arrive."),
         (
             "assistant",
-            "The tracking update shows the package is expected tomorrow.",
+            "The tracking update shows the package for order 1001 is expected tomorrow.",
         ),
         ("user", "Thank you. Please notify me if the delivery date changes."),
+        (
+            "assistant",
+            "Yes, sure. Have a nice day.",
+        ),
     ]
     return [
         Message(role=role, content=content, timestamp=timestamp)
@@ -49,7 +53,7 @@ def build_user2_messages(timestamp: str) -> list[Message]:
         ("user", "My order 2002 delivery is delayed and I need a tracking update."),
         (
             "assistant",
-            "I will investigate the delivery delay and review the shipment tracking.",
+            "I will investigate the delivery delay for order 2002 and review the shipment tracking.",
         ),
         ("user", "The tracking page has not changed since yesterday."),
         (
@@ -57,6 +61,10 @@ def build_user2_messages(timestamp: str) -> list[Message]:
             "The carrier reported a weather delay. The package should arrive Friday.",
         ),
         ("user", "Please send another update if the delivery is delayed again."),
+        (
+                    "assistant",
+                    "Yes, sure. Have a nice day.",
+                ),
     ]
     return [
         Message(role=role, content=content, timestamp=timestamp)
