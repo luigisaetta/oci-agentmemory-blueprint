@@ -96,6 +96,7 @@ def run_searches(memory: OracleAgentMemory) -> None:
             "an explicit user_id for client-level retrieval."
         )
 
+    LOGGER.info("")
     user1_results = memory.search(
         QUERY,
         user_id="user1",
@@ -104,6 +105,7 @@ def run_searches(memory: OracleAgentMemory) -> None:
     )
     log_search_results("Search scoped to user1", user1_results)
 
+    LOGGER.info("")
     user2_results = memory.search(
         QUERY,
         user_id="user2",
@@ -137,14 +139,18 @@ def main() -> int:
             inserted_at, start_offset_seconds=len(user1_messages)
         )
 
+        LOGGER.info("Persisting messages for user1.")
         user1_thread = memory.create_thread(user_id="user1", agent_id=AGENT_ID)
         user1_ids = user1_thread.add_messages(user1_messages)
         LOGGER.info("Persisted %d messages for user1: %s", len(user1_ids), user1_ids)
 
+        LOGGER.info("")
+        LOGGER.info("Persisting messages for user2.")
         user2_thread = memory.create_thread(user_id="user2", agent_id=AGENT_ID)
         user2_ids = user2_thread.add_messages(user2_messages)
         LOGGER.info("Persisted %d messages for user2: %s", len(user2_ids), user2_ids)
 
+        LOGGER.info("")
         run_searches(memory)
     except ConfigurationError as error:
         LOGGER.error("Agent Memory configuration error: %s", error)
