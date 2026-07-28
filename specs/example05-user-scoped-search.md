@@ -15,18 +15,21 @@ searches them using one deliberately overlapping delivery-delay query.
   configuration helpers from `common.py`.
 * It creates one thread for `user1` and one thread for `user2`, both associated
   with the fixed support agent ID `support_agent`.
-* Each thread receives five English customer-support messages, for ten stored
+* Each thread receives six English customer-support messages, for twelve stored
   messages in total. Both conversations contain delivery-delay and tracking
   language so the same query is relevant to both users.
+* Message timestamps are UTC values one second apart. The second thread starts
+  after the final first-thread message, so all twelve sample messages form one
+  chronological sequence.
 * Automatic memory extraction is disabled. The example is about raw persisted
   message retrieval and should not create derived long-term memories.
 * It runs the same query three times for message records:
   1. without a `user_id`, which the client API rejects with `ValueError`;
   2. with `user_id="user1"`;
   3. with `user_id="user2"`.
-* The command logs the expected unscoped-query rejection and the content,
-  message role, and scoped user ID of each returned scoped result. It does not
-  claim that relevance ranking is deterministic.
+* The command logs the expected unscoped-query rejection and the timestamp,
+  content, message role, and scoped user ID of each returned scoped result. It
+  does not claim that relevance ranking is deterministic.
 * Before those three calls, the command logs the exact shared query text.
 * The ADB pool closes after success and all handled failures.
 
@@ -44,7 +47,8 @@ language and are stored in the same ADB-backed memory store.
 
 ## Acceptance criteria
 
-* Unit tests verify the two thread scopes, ten message roles and contents, the
+* Unit tests verify the two thread scopes, twelve message roles and contents,
+  their chronological timestamps, the
   three search calls, expected unscoped-search handling, and resource cleanup.
 * Unit tests verify that both scoped calls use the same query, restrict results
   to `record_types=["message"]`, and use `user1` and `user2` respectively.

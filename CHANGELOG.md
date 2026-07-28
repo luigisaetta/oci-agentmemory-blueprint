@@ -25,6 +25,10 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+* Documented the destructive Example 04 reset procedure for avoiding duplicate
+  Example 05 sample conversations between runs.
+* Updated Example 05 sample messages to use chronological, one-second UTC
+  timestamp increments instead of one shared timestamp.
 * Moved the Example 02 customer-support message construction into a dedicated
   local module to improve the readability of its persistence flow.
 * Made the Oracle Agent Memory connection example safe to import and improved

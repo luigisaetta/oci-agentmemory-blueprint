@@ -32,20 +32,23 @@ VALID_OCI_SETTINGS = {
 MEMORY_STORE_ID = "OAM"
 
 
-def test_message_builders_create_ten_overlapping_customer_support_messages() -> None:
-    """Create two timestamped conversations with similar search language."""
+def test_message_builders_create_chronological_customer_support_messages() -> None:
+    """Create twelve overlapping messages with one-second timestamps."""
     timestamp = "2026-07-28T10:00:00Z"
     user1_messages = build_user1_messages(timestamp)
-    user2_messages = build_user2_messages(timestamp)
+    user2_messages = build_user2_messages(
+        timestamp, start_offset_seconds=len(user1_messages)
+    )
 
-    assert len(user1_messages) == 5
-    assert len(user2_messages) == 5
+    assert len(user1_messages) == 6
+    assert len(user2_messages) == 6
     assert [message.role for message in user1_messages] == [
         "user",
         "assistant",
         "user",
         "assistant",
         "user",
+        "assistant",
     ]
     assert [message.role for message in user2_messages] == [
         "user",
@@ -53,9 +56,16 @@ def test_message_builders_create_ten_overlapping_customer_support_messages() -> 
         "user",
         "assistant",
         "user",
+        "assistant",
     ]
+    timestamps = [
+        datetime.fromisoformat(message.timestamp.replace("Z", "+00:00"))
+        for message in user1_messages + user2_messages
+    ]
+    assert timestamps[0] == datetime.fromisoformat(timestamp.replace("Z", "+00:00"))
     assert all(
-        message.timestamp == timestamp for message in user1_messages + user2_messages
+        (later - earlier).total_seconds() == 1
+        for earlier, later in zip(timestamps, timestamps[1:])
     )
     assert "tracking update" in user1_messages[0].content
     assert "tracking update" in user2_messages[0].content
@@ -84,6 +94,22 @@ def test_create_memory_store_disables_extraction(
     )
 
 
+def test_log_search_results_includes_persisted_timestamp(
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    """Show the event timestamp returned with a scoped search result."""
+    result = Mock()
+    result.record.timestamp = "2026-07-28T10:00:00Z"
+    result.record.user_id = "user1"
+    result.record.role = "user"
+    result.content = "Delivery tracking update"
+    caplog.set_level(logging.INFO, logger=example05.LOGGER.name)
+
+    example05.log_search_results("Search scoped to user1", [result])
+
+    assert "timestamp=2026-07-28T10:00:00Z" in caplog.text
+
+
 def test_main_persists_two_scopes_and_runs_three_searches(
     monkeypatch: pytest.MonkeyPatch, caplog: pytest.LogCaptureFixture
 ) -> None:
@@ -92,8 +118,8 @@ def test_main_persists_two_scopes_and_runs_three_searches(
     memory = Mock()
     user1_thread = Mock()
     user2_thread = Mock()
-    user1_thread.add_messages.return_value = [f"user1-{index}" for index in range(5)]
-    user2_thread.add_messages.return_value = [f"user2-{index}" for index in range(5)]
+    user1_thread.add_messages.return_value = [f"user1-{index}" for index in range(6)]
+    user2_thread.add_messages.return_value = [f"user2-{index}" for index in range(6)]
     memory.create_thread.side_effect = [user1_thread, user2_thread]
     memory.search.side_effect = [ValueError(), [], []]
     monkeypatch.setattr(example05, "create_connection_pool", lambda: connection_pool)
@@ -108,11 +134,19 @@ def test_main_persists_two_scopes_and_runs_three_searches(
         {"user_id": "user1", "agent_id": example05.AGENT_ID},
         {"user_id": "user2", "agent_id": example05.AGENT_ID},
     ]
-    assert len(user1_thread.add_messages.call_args.args[0]) == 5
-    assert len(user2_thread.add_messages.call_args.args[0]) == 5
-    inserted_at = user1_thread.add_messages.call_args.args[0][0].timestamp
-    assert inserted_at == user2_thread.add_messages.call_args.args[0][0].timestamp
-    datetime.fromisoformat(inserted_at.replace("Z", "+00:00"))
+    persisted_messages = (
+        user1_thread.add_messages.call_args.args[0]
+        + user2_thread.add_messages.call_args.args[0]
+    )
+    assert len(persisted_messages) == 12
+    persisted_times = [
+        datetime.fromisoformat(message.timestamp.replace("Z", "+00:00"))
+        for message in persisted_messages
+    ]
+    assert all(
+        (later - earlier).total_seconds() == 1
+        for earlier, later in zip(persisted_times, persisted_times[1:])
+    )
     assert memory.search.call_args_list[0].args == (example05.QUERY,)
     assert memory.search.call_args_list[0].kwargs == {
         "record_types": ["message"],
@@ -136,7 +170,7 @@ def test_main_closes_pool_when_scoped_search_fails(
     """Close the pool and report retrieval errors without message content."""
     connection_pool = Mock()
     memory = Mock()
-    memory.create_thread.return_value.add_messages.return_value = ["message"] * 5
+    memory.create_thread.return_value.add_messages.return_value = ["message"] * 6
     memory.search.side_effect = [ValueError(), RuntimeError()]
     monkeypatch.setattr(example05, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example05, "load_oci_settings", lambda: VALID_OCI_SETTINGS)

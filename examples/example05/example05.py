@@ -73,7 +73,8 @@ def log_search_results(label: str, results: list[object]) -> None:
     for result in results:
         record = result.record
         LOGGER.info(
-            "Result user=%s role=%s content=%s",
+            "Result timestamp=%s user=%s role=%s content=%s",
+            record.timestamp,
             record.user_id,
             record.role,
             result.content,
@@ -131,12 +132,17 @@ def main() -> int:
         )
         inserted_at = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
+        user1_messages = build_user1_messages(inserted_at)
+        user2_messages = build_user2_messages(
+            inserted_at, start_offset_seconds=len(user1_messages)
+        )
+
         user1_thread = memory.create_thread(user_id="user1", agent_id=AGENT_ID)
-        user1_ids = user1_thread.add_messages(build_user1_messages(inserted_at))
+        user1_ids = user1_thread.add_messages(user1_messages)
         LOGGER.info("Persisted %d messages for user1: %s", len(user1_ids), user1_ids)
 
         user2_thread = memory.create_thread(user_id="user2", agent_id=AGENT_ID)
-        user2_ids = user2_thread.add_messages(build_user2_messages(inserted_at))
+        user2_ids = user2_thread.add_messages(user2_messages)
         LOGGER.info("Persisted %d messages for user2: %s", len(user2_ids), user2_ids)
 
         run_searches(memory)
