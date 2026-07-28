@@ -106,6 +106,12 @@ def main() -> int:
         prompt_context = card.content
         LOGGER.info("Generated Context Card: %s", prompt_context)
 
+        # the context card can be used passing it to an LLM
+
+        # if we want only the summary
+        summary = thread.get_summary()
+        LOGGER.info("Summary: %s", summary.content)
+
     except ConfigurationError as error:
         LOGGER.error("Agent Memory configuration error: %s", error)
         LOGGER.error("Stack trace:", exc_info=True)
