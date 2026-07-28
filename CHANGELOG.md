@@ -6,6 +6,10 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+* Added the shared `MEMORY_STORE_ID` environment setting, validation, and test
+  coverage so all Agent Memory examples target one explicitly configured store.
+* Added Example 04, specifications, documentation, and unit tests for an
+  explicit destructive reset of the managed Agent Memory store schema.
 * Added Example 03, which authenticates OCI Generative AI model calls through
   an OCI Resource Principal while persisting Agent Memory in ADB.
 * Added Resource Principal configuration helpers, documentation, specification,

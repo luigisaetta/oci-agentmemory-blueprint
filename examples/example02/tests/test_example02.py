@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-27
+Date last modified: 2026-07-28
 License: MIT
 Description: Unit tests for the customer-support conversation memory example.
 """
@@ -28,6 +28,7 @@ VALID_OCI_SETTINGS = {
     "tenancy": "ocid1.tenancy.oc1..example",
     "key_file": "~/.oci/oci_api_key.pem",
 }
+MEMORY_STORE_ID = "OAM_"
 
 
 def test_build_customer_support_messages_has_ten_alternating_english_messages() -> None:
@@ -53,11 +54,11 @@ def test_create_memory_store_builds_oci_providers(
     monkeypatch.setattr(example02, "OracleAgentMemory", memory_factory)
     connection_pool = Mock()
 
-    example02.create_memory_store(connection_pool, VALID_OCI_SETTINGS)
+    example02.create_memory_store(connection_pool, VALID_OCI_SETTINGS, MEMORY_STORE_ID)
 
     assert embedder_factory.call_args.kwargs["model"] == example02.EMBEDDING_MODEL_ID
     assert memory_factory.call_args.kwargs["connection"] is connection_pool
-    assert memory_factory.call_args.kwargs["memory_store_id"] == "OAM_"
+    assert memory_factory.call_args.kwargs["memory_store_id"] == MEMORY_STORE_ID
 
 
 def test_main_persists_conversation_and_closes_pool(
@@ -74,6 +75,7 @@ def test_main_persists_conversation_and_closes_pool(
     )
     monkeypatch.setattr(example02, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example02, "load_oci_settings", lambda: VALID_OCI_SETTINGS)
+    monkeypatch.setattr(example02, "load_memory_store_id", lambda: MEMORY_STORE_ID)
     monkeypatch.setattr(example02, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example02.LOGGER.name)
 
@@ -107,6 +109,7 @@ def test_main_closes_pool_when_message_persistence_fails(
     memory.create_thread.return_value.add_messages.side_effect = ValueError()
     monkeypatch.setattr(example02, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example02, "load_oci_settings", lambda: VALID_OCI_SETTINGS)
+    monkeypatch.setattr(example02, "load_memory_store_id", lambda: MEMORY_STORE_ID)
     monkeypatch.setattr(example02, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example02.LOGGER.name)
 

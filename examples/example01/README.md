@@ -23,7 +23,7 @@ It demonstrates three steps:
 
 1. **Create an Agent Memory client.** `create_memory_store` creates
    `OracleAgentMemory` with an ADB connection pool, an OCI embedder, an OCI LLM,
-   and the `OAM_` memory-store ID. The ADB and OCI configuration helpers are in
+   and the shared `MEMORY_STORE_ID` configuration value. The ADB and OCI configuration helpers are in
    [`common.py`](../../common.py) so future examples can reuse them.
 2. **Create a thread.** `memory.create_thread` creates a conversation boundary
    for `user_123` and `agent_456`. Oracle Agent Memory generates the thread ID;

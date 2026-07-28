@@ -21,6 +21,8 @@ use its configured database credentials and wallet.
 * The example obtains its signer with
   `oci.auth.signers.get_resource_principals_signer()` immediately before it
   configures the OCI embedder and LLM.
+* The command loads the shared `MEMORY_STORE_ID` from the process environment
+  or repository-root `.env` and passes it to Oracle Agent Memory.
 * `Embedder` and `Llm` receive `oci_compartment_id`, `oci_region`, and
   `oci_signer`. They must not receive user API-key configuration values such as
   `oci_user`, `oci_fingerprint`, `oci_tenancy`, or `oci_key_file`.

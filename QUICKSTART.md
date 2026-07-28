@@ -49,6 +49,7 @@ Set the following values in `.env`:
 | `DB_POOL_MIN` | Minimum number of connections kept in the ADB connection pool. | `1` |
 | `DB_POOL_MAX` | Maximum number of connections allowed in the ADB connection pool. | `5` |
 | `DB_POOL_INCREMENT` | Number of connections added when the pool needs to grow. | `1` |
+| `MEMORY_STORE_ID` | Shared identifier for the Agent Memory-managed tables and indexes used by every example. | `OAM_` |
 
 For example, your local `.env` will use the variable names from the template with values specific to your database and environment:
 
@@ -61,6 +62,7 @@ DB_DSN=<service-alias-from-tnsnames-ora>
 DB_POOL_MIN=1
 DB_POOL_MAX=5
 DB_POOL_INCREMENT=1
+MEMORY_STORE_ID=OAM_
 ```
 
 Do not use the `ADMIN` account for the application connection. Create and grant a least-privilege database user appropriate to the schema and operations required by the example you are running.
@@ -102,7 +104,8 @@ Run the example from the repository root:
 python -m examples.example01.example01
 ```
 
-The example creates the configured memory store with the `OAM_` store ID and
+The example creates the configured memory store with the `MEMORY_STORE_ID` from
+`.env` and
 creates any required schema objects. It creates a named thread and stores two
 sample messages in it, including a user preference. The ADB connection pool is
 closed before the command exits. Every run lets Oracle Agent Memory generate
@@ -115,6 +118,25 @@ logs, tickets, or source control.
 Message insertion uses the synchronous Agent Memory API. Automatic memory
 extraction still runs in the background, so derived memories can be available
 after the source thread messages are stored.
+
+## Recreate the managed Agent Memory schema
+
+Example 04 is a destructive maintenance operation for the memory store selected
+by `MEMORY_STORE_ID`.
+It uses `SchemaPolicy.RECREATE` to drop and recreate Agent Memory-managed
+tables, indexes, and retrieval objects. All stored threads, messages, memories,
+profiles, and retrieval data for that store are permanently removed.
+
+Stop applications using the store, verify that the ADB account is authorised to
+manage the schema objects, and make a database backup if recovery could be
+required. Then run:
+
+```bash
+python -m examples.example04.example04
+```
+
+See [Example 04](examples/example04/README.md) for the persistence boundary and
+the safer per-thread and per-user cleanup alternatives.
 
 ## Use OCI Resource Principal authentication
 

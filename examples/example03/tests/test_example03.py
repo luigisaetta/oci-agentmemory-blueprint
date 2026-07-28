@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-27
+Date last modified: 2026-07-28
 License: MIT
 Description: Unit tests for the Resource Principal Agent Memory example.
 """
@@ -23,6 +23,7 @@ RESOURCE_PRINCIPAL_SETTINGS = {
     "compartment_id": "ocid1.compartment.oc1..example",
     "region": "eu-frankfurt-1",
 }
+MEMORY_STORE_ID = "OAM_"
 
 
 def test_create_memory_store_uses_only_resource_principal_arguments(
@@ -40,7 +41,7 @@ def test_create_memory_store_uses_only_resource_principal_arguments(
     monkeypatch.setattr(example03, "Llm", llm_factory)
     monkeypatch.setattr(example03, "OracleAgentMemory", memory_factory)
 
-    example03.create_memory_store(Mock(), RESOURCE_PRINCIPAL_SETTINGS)
+    example03.create_memory_store(Mock(), RESOURCE_PRINCIPAL_SETTINGS, MEMORY_STORE_ID)
 
     expected_arguments = {
         "oci_compartment_id": "ocid1.compartment.oc1..example",
@@ -73,6 +74,7 @@ def test_main_persists_messages_and_closes_pool(
         "load_resource_principal_settings",
         lambda: RESOURCE_PRINCIPAL_SETTINGS,
     )
+    monkeypatch.setattr(example03, "load_memory_store_id", lambda: MEMORY_STORE_ID)
     monkeypatch.setattr(example03, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example03.LOGGER.name)
 
@@ -99,6 +101,7 @@ def test_main_reports_unavailable_resource_principal_and_closes_pool(
         "load_resource_principal_settings",
         lambda: RESOURCE_PRINCIPAL_SETTINGS,
     )
+    monkeypatch.setattr(example03, "load_memory_store_id", lambda: MEMORY_STORE_ID)
     monkeypatch.setattr(
         example03,
         "create_memory_store",
@@ -135,6 +138,7 @@ def test_main_reports_other_failures_and_closes_pool(
         "load_resource_principal_settings",
         lambda: RESOURCE_PRINCIPAL_SETTINGS,
     )
+    monkeypatch.setattr(example03, "load_memory_store_id", lambda: MEMORY_STORE_ID)
     monkeypatch.setattr(
         example03,
         "create_memory_store",

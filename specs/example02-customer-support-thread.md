@@ -11,6 +11,10 @@ The fixed conversation and its message builder are kept in the local
 `examples/example02/messages.py` module so the persistence flow remains easy
 to follow.
 
+The example loads the shared `MEMORY_STORE_ID` from the process environment or
+repository-root `.env` so it uses the same managed Agent Memory objects as the
+other examples.
+
 ## Behaviour
 
 * Importing the module has no ADB, OCI, or Oracle Agent Memory side effects.

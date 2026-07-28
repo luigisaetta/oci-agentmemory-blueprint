@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-27
+Date last modified: 2026-07-28
 License: MIT
 Description: Unit tests for shared ADB and OCI configuration helpers.
 """
@@ -121,3 +121,24 @@ def test_load_resource_principal_settings_prefers_environment(
     monkeypatch.setattr(common, "dotenv_values", Mock(return_value={}))
     with pytest.raises(common.ConfigurationError, match="GENAI_COMPARTMENT_ID"):
         common.load_resource_principal_settings()
+
+
+def test_load_memory_store_id_prefers_environment_and_validates_format(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Load one shared store ID and reject invalid managed-object names."""
+    monkeypatch.setattr(
+        common, "dotenv_values", Mock(return_value={"MEMORY_STORE_ID": "OAM_"})
+    )
+    monkeypatch.setenv("MEMORY_STORE_ID", "TEAM_MEMORY_1")
+
+    assert common.load_memory_store_id() == "TEAM_MEMORY_1"
+
+    monkeypatch.setenv("MEMORY_STORE_ID", "1_invalid")
+    with pytest.raises(common.ConfigurationError, match="must start with a letter"):
+        common.load_memory_store_id()
+
+    monkeypatch.delenv("MEMORY_STORE_ID")
+    monkeypatch.setattr(common, "dotenv_values", Mock(return_value={}))
+    with pytest.raises(common.ConfigurationError, match="Missing required setting"):
+        common.load_memory_store_id()

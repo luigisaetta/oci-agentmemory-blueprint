@@ -15,6 +15,8 @@ does not change the configured models.
   from the repository-root `.env` file and create the ADB connection pool
   directly with `oracledb.create_pool`.
 * The OCI configuration path must expand `~` before it is passed to the OCI SDK.
+* The command loads the shared `MEMORY_STORE_ID` from the process environment
+  or repository-root `.env` and passes it to Oracle Agent Memory.
 * The example must require the OCI settings used to initialise the embedder and
   LLM, including `compartment_id`.
 * On success it creates `OracleAgentMemory`, reports a non-sensitive success

@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-27
+Date last modified: 2026-07-28
 License: MIT
 Description: Persists a customer-support conversation in Oracle Agent Memory.
 """
@@ -20,7 +20,12 @@ from oracleagentmemory.core.dbschemapolicy import SchemaPolicy
 from oracleagentmemory.core.embedders.embedder import Embedder
 from oracleagentmemory.core.llms.llm import Llm
 
-from common import ConfigurationError, create_connection_pool, load_oci_settings
+from common import (
+    ConfigurationError,
+    create_connection_pool,
+    load_memory_store_id,
+    load_oci_settings,
+)
 from examples.example02.messages import build_customer_support_messages
 
 MODEL_ID = "oci/openai.gpt-oss-120b"
@@ -29,13 +34,16 @@ LOGGER = logging.getLogger(__name__)
 
 
 def create_memory_store(
-    connection_pool: oracledb.ConnectionPool, oci_config: dict[str, str]
+    connection_pool: oracledb.ConnectionPool,
+    oci_config: dict[str, str],
+    memory_store_id: str,
 ) -> OracleAgentMemory:
     """Create the configured Oracle Agent Memory store.
 
     Args:
         connection_pool: Open ADB connection pool used for persistence.
         oci_config: Validated OCI profile values for model providers.
+        memory_store_id: Shared identifier for the managed Agent Memory store.
 
     Returns:
         A configured Oracle Agent Memory instance.
@@ -53,7 +61,7 @@ def create_memory_store(
         embedder=Embedder(model=EMBEDDING_MODEL_ID, **oci_arguments),
         llm=Llm(model=MODEL_ID, **oci_arguments),
         schema_policy=SchemaPolicy.CREATE_IF_NECESSARY,
-        memory_store_id="OAM_",
+        memory_store_id=memory_store_id,
         memory_extraction_config=MemoryExtractionConfig(
             extract_memories=True,
             extraction_mode=MemoryExtractionMode.BACKGROUND,
@@ -79,7 +87,9 @@ def main() -> int:
         LOGGER.info("Created connection pool.")
 
         # create the memory store
-        memory = create_memory_store(connection_pool, load_oci_settings())
+        memory = create_memory_store(
+            connection_pool, load_oci_settings(), load_memory_store_id()
+        )
         LOGGER.info("Successfully connected to Agent Memory.")
         thread = memory.create_thread(
             user_id="customer_123", agent_id="support_agent_456"

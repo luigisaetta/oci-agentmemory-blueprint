@@ -1,12 +1,13 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-27
+Date last modified: 2026-07-28
 License: MIT
 Description: Shared local OCI and Oracle Autonomous Database configuration helpers.
 """
 
 import os
 from pathlib import Path
+import re
 
 import oracledb
 from dotenv import dotenv_values
@@ -36,6 +37,8 @@ REQUIRED_RESOURCE_PRINCIPAL_SETTINGS = (
     "GENAI_COMPARTMENT_ID",
     "GENAI_REGION",
 )
+MEMORY_STORE_ID_SETTING = "MEMORY_STORE_ID"
+MEMORY_STORE_ID_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9_]{0,15}")
 
 
 class ConfigurationError(ValueError):
@@ -138,3 +141,33 @@ def load_resource_principal_settings() -> dict[str, str]:
         "compartment_id": settings["GENAI_COMPARTMENT_ID"],
         "region": settings["GENAI_REGION"],
     }
+
+
+def load_memory_store_id() -> str:
+    """Load and validate the shared Oracle Agent Memory store identifier.
+
+    The process environment takes precedence over the repository-root `.env`
+    file. The value must meet the Oracle Agent Memory `memory_store_id`
+    naming requirements so every example addresses the same managed objects.
+
+    Returns:
+        The configured memory store identifier.
+
+    Raises:
+        ConfigurationError: If the identifier is missing or has an invalid
+            format.
+    """
+    environment = dotenv_values(ENV_FILE)
+    memory_store_id = (
+        os.environ.get(MEMORY_STORE_ID_SETTING)
+        or environment.get(MEMORY_STORE_ID_SETTING)
+        or ""
+    ).strip()
+    if not memory_store_id:
+        raise ConfigurationError(f"Missing required setting: {MEMORY_STORE_ID_SETTING}")
+    if not MEMORY_STORE_ID_PATTERN.fullmatch(memory_store_id):
+        raise ConfigurationError(
+            f"{MEMORY_STORE_ID_SETTING} must start with a letter, contain only "
+            "letters, numbers, or underscores, and be at most 16 characters."
+        )
+    return memory_store_id

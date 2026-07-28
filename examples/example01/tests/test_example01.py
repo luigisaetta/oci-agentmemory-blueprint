@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-24
+Date last modified: 2026-07-28
 License: MIT
 Description: Unit tests for the Oracle Agent Memory startup example.
 """
@@ -27,6 +27,7 @@ VALID_OCI_SETTINGS = {
     "tenancy": "ocid1.tenancy.oc1..example",
     "key_file": "~/.oci/oci_api_key.pem",
 }
+MEMORY_STORE_ID = "OAM_"
 
 
 def test_create_memory_store_builds_oci_providers(
@@ -39,11 +40,11 @@ def test_create_memory_store_builds_oci_providers(
     monkeypatch.setattr(example01, "OracleAgentMemory", memory_factory)
     connection_pool = Mock()
 
-    example01.create_memory_store(connection_pool, VALID_OCI_SETTINGS)
+    example01.create_memory_store(connection_pool, VALID_OCI_SETTINGS, MEMORY_STORE_ID)
 
     assert embedder_factory.call_args.kwargs["model"] == example01.EMBEDDING_MODEL_ID
     assert memory_factory.call_args.kwargs["connection"] is connection_pool
-    assert memory_factory.call_args.kwargs["memory_store_id"] == "OAM_"
+    assert memory_factory.call_args.kwargs["memory_store_id"] == MEMORY_STORE_ID
 
 
 def test_main_closes_pool_on_success_and_failure(
@@ -58,6 +59,7 @@ def test_main_closes_pool_on_success_and_failure(
     ]
     monkeypatch.setattr(example01, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example01, "load_oci_settings", lambda: VALID_OCI_SETTINGS)
+    monkeypatch.setattr(example01, "load_memory_store_id", lambda: MEMORY_STORE_ID)
     monkeypatch.setattr(example01, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example01.LOGGER.name)
 
@@ -92,6 +94,7 @@ def test_main_explains_value_errors_when_adding_messages(
     memory.create_thread.return_value.add_messages.side_effect = ValueError()
     monkeypatch.setattr(example01, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example01, "load_oci_settings", lambda: VALID_OCI_SETTINGS)
+    monkeypatch.setattr(example01, "load_memory_store_id", lambda: MEMORY_STORE_ID)
     monkeypatch.setattr(example01, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example01.LOGGER.name)
 
@@ -112,6 +115,7 @@ def test_main_explains_thread_id_collision_errors(
     memory.create_thread.side_effect = ValueError()
     monkeypatch.setattr(example01, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example01, "load_oci_settings", lambda: VALID_OCI_SETTINGS)
+    monkeypatch.setattr(example01, "load_memory_store_id", lambda: MEMORY_STORE_ID)
     monkeypatch.setattr(example01, "create_memory_store", Mock(return_value=memory))
     caplog.set_level(logging.INFO, logger=example01.LOGGER.name)
 
