@@ -27,6 +27,7 @@ searches them using one deliberately overlapping delivery-delay query.
 * The command logs the expected unscoped-query rejection and the content,
   message role, and scoped user ID of each returned scoped result. It does not
   claim that relevance ranking is deterministic.
+* Before those three calls, the command logs the exact shared query text.
 * The ADB pool closes after success and all handled failures.
 
 ## Isolation and persistence boundary

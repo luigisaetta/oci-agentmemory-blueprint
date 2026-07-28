@@ -22,6 +22,9 @@ The example makes three client-level calls using the same query:
 2. A call scoped to `user1` with `record_types=["message"]`.
 3. A call scoped to `user2` with `record_types=["message"]`.
 
+Before the calls, the command logs the exact query text so the shared search
+input is visible alongside the three different scope outcomes.
+
 Client-level Oracle Agent Memory search requires an explicit user scope. This
 is an intentional protection against cross-user retrieval. The result order is
 based on relevance and can vary with embeddings, stored data, and database

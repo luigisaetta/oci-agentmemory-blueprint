@@ -126,6 +126,7 @@ def test_main_persists_two_scopes_and_runs_three_searches(
             "max_results": example05.MAX_RESULTS,
         }
     assert "Unscoped client search was rejected" in caplog.text
+    assert f"Running message search query: {example05.QUERY}" in caplog.text
     connection_pool.close.assert_called_once_with()
 
 

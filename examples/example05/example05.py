@@ -86,6 +86,7 @@ def run_searches(memory: OracleAgentMemory) -> None:
     Args:
         memory: Configured Agent Memory client containing both user threads.
     """
+    LOGGER.info("Running message search query: %s", QUERY)
     try:
         memory.search(QUERY, record_types=["message"], max_results=MAX_RESULTS)
     except ValueError:
