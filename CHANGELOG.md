@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+* Added Example 05, which persists two overlapping customer-support threads
+  and demonstrates the user-isolation boundary of client-level message search.
 * Added the shared `MEMORY_STORE_ID` environment setting, validation, and test
   coverage so all Agent Memory examples target one explicitly configured store.
 * Added Example 04, specifications, documentation, and unit tests for an
