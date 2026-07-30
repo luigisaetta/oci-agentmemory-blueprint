@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-28
+Date last modified: 2026-07-30
 License: MIT
 Description: Shared local OCI and Oracle Autonomous Database configuration helpers.
 """
@@ -36,6 +36,10 @@ REQUIRED_OCI_SETTINGS = (
 REQUIRED_RESOURCE_PRINCIPAL_SETTINGS = (
     "GENAI_COMPARTMENT_ID",
     "GENAI_REGION",
+)
+REQUIRED_GENAI_CHAT_SETTINGS = (
+    "GENAI_REGION",
+    "GENAI_MODEL_ID",
 )
 MEMORY_STORE_ID_SETTING = "MEMORY_STORE_ID"
 MEMORY_STORE_ID_PATTERN = re.compile(r"[A-Za-z][A-Za-z0-9_]{0,15}")
@@ -140,6 +144,35 @@ def load_resource_principal_settings() -> dict[str, str]:
     return {
         "compartment_id": settings["GENAI_COMPARTMENT_ID"],
         "region": settings["GENAI_REGION"],
+    }
+
+
+def load_genai_chat_settings() -> dict[str, str]:
+    """Load OCI chat-model region and ID from local configuration.
+
+    Process environment values take precedence over repository-root `.env`
+    values, allowing an approved deployment environment to override the local
+    chatbot settings without embedding them in source code.
+
+    Returns:
+        The region and model ID required by the Example 11 LangChain client.
+
+    Raises:
+        ConfigurationError: If the configured region or model ID is missing.
+    """
+    environment = dotenv_values(ENV_FILE)
+    settings = {
+        name: os.environ.get(name) or environment.get(name) or ""
+        for name in REQUIRED_GENAI_CHAT_SETTINGS
+    }
+    missing_settings = [name for name, value in settings.items() if not value.strip()]
+    if missing_settings:
+        raise ConfigurationError(
+            "Missing required Generative AI settings: " + ", ".join(missing_settings)
+        )
+    return {
+        "region": settings["GENAI_REGION"],
+        "model_id": settings["GENAI_MODEL_ID"],
     }
 
 

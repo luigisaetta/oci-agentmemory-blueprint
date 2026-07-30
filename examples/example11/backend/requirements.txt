@@ -1,0 +1,3 @@
+fastapi
+uvicorn[standard]
+langchain-oci==0.3.1

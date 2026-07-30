@@ -6,6 +6,9 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+* Added the Example 11 FastAPI backend startup script and local run guidance.
+* Added the Example 11 FastAPI chatbot backend, specifications, tests, and
+  `langchain-oci` dependency for durable, user-scoped thread chat without RAG.
 * Added an Example 10 backend startup script for local Uvicorn development.
 * Added Example 10, a FastAPI and Next.js Agent Memory Console for scoped
   thread creation, messages, thread insights, search, and recent-thread lists.
@@ -32,6 +35,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+* Made the Example 11 OCI chat endpoint region and model ID configurable
+  through `GENAI_REGION` and `GENAI_MODEL_ID`.
 * Enabled background automatic long-term memory extraction in the Example 10
   Agent Memory Console.
 * Updated Example 10 to Next.js 16 and pinned patched transitive PostCSS and

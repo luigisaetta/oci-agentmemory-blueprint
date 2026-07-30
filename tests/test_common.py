@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-28
+Date last modified: 2026-07-30
 License: MIT
 Description: Unit tests for shared ADB and OCI configuration helpers.
 """
@@ -35,6 +35,10 @@ VALID_OCI_SETTINGS = {
 VALID_RESOURCE_PRINCIPAL_SETTINGS = {
     "GENAI_COMPARTMENT_ID": "ocid1.compartment.oc1..example",
     "GENAI_REGION": "eu-frankfurt-1",
+}
+VALID_GENAI_CHAT_SETTINGS = {
+    "GENAI_REGION": "eu-frankfurt-1",
+    "GENAI_MODEL_ID": "meta.llama-3.3-70b-instruct",
 }
 
 
@@ -121,6 +125,26 @@ def test_load_resource_principal_settings_prefers_environment(
     monkeypatch.setattr(common, "dotenv_values", Mock(return_value={}))
     with pytest.raises(common.ConfigurationError, match="GENAI_COMPARTMENT_ID"):
         common.load_resource_principal_settings()
+
+
+def test_load_genai_chat_settings_requires_model_and_region(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Load the chatbot model configuration from environment or `.env`."""
+    monkeypatch.setattr(
+        common, "dotenv_values", Mock(return_value=VALID_GENAI_CHAT_SETTINGS)
+    )
+    monkeypatch.setenv("GENAI_MODEL_ID", "meta.llama-4-scout-17b-16e-instruct")
+
+    assert common.load_genai_chat_settings() == {
+        "region": "eu-frankfurt-1",
+        "model_id": "meta.llama-4-scout-17b-16e-instruct",
+    }
+
+    monkeypatch.delenv("GENAI_MODEL_ID")
+    monkeypatch.setattr(common, "dotenv_values", Mock(return_value={}))
+    with pytest.raises(common.ConfigurationError, match="GENAI_REGION"):
+        common.load_genai_chat_settings()
 
 
 def test_load_memory_store_id_prefers_environment_and_validates_format(

@@ -154,3 +154,17 @@ in an OCI-managed environment with Resource Principal support, a dynamic group
 that includes the executing resource, and permission to use Generative AI in
 the selected compartment. See [Example 03](examples/example03/README.md) for
 the IAM policy and OCI Data Science Notebook Session setup.
+
+## Configure the Example 11 chat model
+
+Example 11 uses the local OCI API-key profile and reads the following
+non-secret chat settings from `.env` (or process environment variables):
+
+| Variable | Description | Safe example |
+| --- | --- | --- |
+| `GENAI_REGION` | Region used to construct the OCI Generative AI endpoint. | `eu-frankfurt-1` |
+| `GENAI_MODEL_ID` | OCI Generative AI chat-model ID for chatbot responses. | `meta.llama-3.3-70b-instruct` |
+
+`GENAI_MODEL_ID` must be available in `GENAI_REGION`. Example 11 uses the
+`DEFAULT` profile in `~/.oci/config`, including its configured API key and
+compartment; do not put key material in `.env`.
