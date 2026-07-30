@@ -61,9 +61,17 @@ This blueprint is intended for AI application developers, solution architects, a
 
 ## Repository status
 
-The blueprint currently includes a local ADB connection check and the first
-Oracle Agent Memory thread example. Additional examples and production patterns
-will be added incrementally.
+The blueprint currently includes a local ADB connection check and five
+progressive Oracle Agent Memory examples. Together, they cover creating an
+ADB-backed memory client and thread, persisting conversation messages,
+retrieving a Context Card for a subsequent LLM turn, using OCI Resource
+Principal authentication for Generative AI, safely recreating a managed memory
+store for approved maintenance, and enforcing user-scoped raw-message search.
+
+The examples make the persistence boundary, short-term conversation state,
+background long-term-memory extraction, authentication, destructive
+maintenance, and user-isolation trade-offs explicit. Further production
+patterns will be added incrementally as they are implemented and verified.
 
 ## Contributing
 
