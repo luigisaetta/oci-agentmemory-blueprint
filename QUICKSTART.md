@@ -49,7 +49,7 @@ Set the following values in `.env`:
 | `DB_POOL_MIN` | Minimum number of connections kept in the ADB connection pool. | `1` |
 | `DB_POOL_MAX` | Maximum number of connections allowed in the ADB connection pool. | `5` |
 | `DB_POOL_INCREMENT` | Number of connections added when the pool needs to grow. | `1` |
-| `MEMORY_STORE_ID` | Shared identifier for the Agent Memory-managed tables and indexes used by every example. | `OAM_` |
+| `MEMORY_STORE_ID` | Shared identifier for the Agent Memory-managed tables and indexes used by every example. | `OAM` |
 
 For example, your local `.env` will use the variable names from the template with values specific to your database and environment:
 
@@ -62,7 +62,7 @@ DB_DSN=<service-alias-from-tnsnames-ora>
 DB_POOL_MIN=1
 DB_POOL_MAX=5
 DB_POOL_INCREMENT=1
-MEMORY_STORE_ID=OAM_
+MEMORY_STORE_ID=OAM
 ```
 
 Do not use the `ADMIN` account for the application connection. Create and grant a least-privilege database user appropriate to the schema and operations required by the example you are running.
