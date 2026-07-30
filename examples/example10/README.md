@@ -53,6 +53,10 @@ browser-provided user ID is only a demo retrieval scope, not authentication:
 production systems must derive user and tenant scope from the authenticated
 principal. The backend opens and closes an ADB pool for every request.
 
+Generating Summary and Context Card can take time. The UI displays a loading
+indicator while the request is in progress, then renders the XML-like Context
+Card as an expandable tree so its sections and values are easy to inspect.
+
 Thread discovery is message-based because this SDK version has no supported
 client-level list operation. Replace that internal implementation when a public
 thread-list API becomes available.

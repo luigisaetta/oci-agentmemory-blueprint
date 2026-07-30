@@ -22,6 +22,9 @@ features through a browser while keeping all OCI and ADB access on the server.
   requests through `allowedDevOrigins`.
 * The frontend navigation switches between distinct Threads, Conversation, and
   Search views; it does not merely scroll the current page.
+* Summary and Context Card generation displays an in-progress state until the
+  API responds. The XML-like Context Card is rendered as an expandable
+  structured tree, with a raw-text fallback for malformed or non-XML content.
 * Oracle/ADB configuration remains server-side and uses `common.py` helpers.
   No browser bundle, frontend environment variable, log, or API response may
   expose credentials or OCI profile values.
