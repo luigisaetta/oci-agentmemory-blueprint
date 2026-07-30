@@ -18,6 +18,8 @@ features through a browser while keeping all OCI and ADB access on the server.
 * Thread discovery uses the message-record workaround from Example 06; only
   threads with messages are listed.
 * The API configures explicit local CORS origins through `EXAMPLE10_CORS_ORIGINS`.
+  The Next.js development server explicitly permits local `127.0.0.1` HMR
+  requests through `allowedDevOrigins`.
 * Oracle/ADB configuration remains server-side and uses `common.py` helpers.
   No browser bundle, frontend environment variable, log, or API response may
   expose credentials or OCI profile values.
