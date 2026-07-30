@@ -47,7 +47,7 @@ Each example will explain its use case, architecture, configuration, expected be
 | [Example 03: Use Resource Principal with Oracle Agent Memory](examples/example03/README.md) | Uses OCI Resource Principal authentication for OCI Generative AI while retaining ADB-backed memory persistence. |
 | [Example 04: Recreate an Oracle Agent Memory Schema](examples/example04/README.md) | Performs an explicit, destructive reset of the managed store selected by `MEMORY_STORE_ID` for development or approved maintenance. |
 | [Example 05: Search Customer-Support Messages by User Scope](examples/example05/README.md) | Stores two overlapping support conversations and demonstrates rejected unscoped versus user-scoped message searches. |
-| [Example 06: List a User's Populated Threads](examples/example06/README.md) | Lists a user's message-bearing conversation threads by most recent message, using a temporary private-store workaround. |
+| [Example 06: List a User's Populated Threads](examples/example06/README.md) | Lists the most recent conversation threads associated with a specified user. |
 | [ADB connection check](examples/test_adb_connections/test_db_connection.py) | Validates the local wallet-based ADB configuration with `SELECT 1 FROM dual` before running a memory example. |
 
 ## Who this is for
