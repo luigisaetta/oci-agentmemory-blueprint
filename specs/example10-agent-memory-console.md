@@ -29,6 +29,8 @@ features through a browser while keeping all OCI and ADB access on the server.
 * Thread loading, thread-message loading, and scoped search display an
   in-progress state. Applying a new user scope clears every thread-specific
   selection, insight, message, and search result before loading that user.
+  Creating a new thread likewise clears the prior thread's messages and
+  generated insights.
 * `backend/start_server.sh` starts the FastAPI server from any working
   directory, using Uvicorn reload mode and optional `EXAMPLE10_API_HOST` and
   `EXAMPLE10_API_PORT` overrides.

@@ -86,7 +86,7 @@ export default function Console() {
   const createThread = async () => {
     try {
       const data = await request(`/api/users/${encodeURIComponent(user)}/threads`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
-      setSelected(data.thread_id); setMessages([]); setView("thread"); setNotice("Thread created. Add its first message to make it visible in Recent threads.");
+      setSelected(data.thread_id); setMessages([]); setInsights({ summary: "", context_card: "" }); setView("thread"); setNotice("Thread created. Add its first message to make it visible in Recent threads.");
     } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to create thread."); }
   };
   const addMessage = async (event: FormEvent) => {

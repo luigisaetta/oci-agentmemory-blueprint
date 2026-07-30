@@ -8,6 +8,7 @@ Description: Unit tests for the Example 10 FastAPI memory-client configuration.
 from unittest.mock import Mock
 
 import pytest
+from fastapi.testclient import TestClient
 
 from examples.example10.backend import app as console_app
 
@@ -42,3 +43,25 @@ def test_create_memory_store_configures_llm_for_thread_insights(
     assert (
         extraction_config.extraction_mode == console_app.MemoryExtractionMode.BACKGROUND
     )
+
+
+def test_threads_response_allows_integer_message_count(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Serialize the message count as an integer in the thread-list response."""
+    monkeypatch.setattr(
+        console_app,
+        "with_memory",
+        lambda _callback: [
+            {
+                "thread_id": "thread-1",
+                "latest_message_timestamp": "2026-07-30T10:00:00Z",
+                "message_count": 3,
+            }
+        ],
+    )
+
+    response = TestClient(console_app.app).get("/api/users/customer_123/threads")
+
+    assert response.status_code == 200
+    assert response.json()[0]["message_count"] == 3

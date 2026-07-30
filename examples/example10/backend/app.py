@@ -129,7 +129,7 @@ def health() -> dict[str, str]:
 
 
 @app.get("/api/users/{user_id}/threads")
-def threads(user_id: str) -> list[dict[str, str]]:
+def threads(user_id: str) -> list[dict[str, str | int]]:
     """List the selected user's message-bearing threads by latest activity."""
     user_id = validate_identifier(user_id, "user_id")
     return with_memory(
