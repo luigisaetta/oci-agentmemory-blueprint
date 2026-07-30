@@ -23,7 +23,9 @@ from examples.example06.example06 import list_populated_threads
 
 APP_NAME = "Example 10 Agent Memory Console"
 EMBEDDING_MODEL_ID = "oci/cohere.embed-multilingual-v3.0"
-CORS_ORIGINS = os.getenv("EXAMPLE10_CORS_ORIGINS", "http://localhost:3000").split(",")
+CORS_ORIGINS = os.getenv(
+    "EXAMPLE10_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
+).split(",")
 
 
 class ThreadCreate(BaseModel):

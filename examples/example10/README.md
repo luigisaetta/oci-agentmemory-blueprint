@@ -36,9 +36,9 @@ npm run dev
 The frontend requires Node.js 20.9 or later.
 
 Open `http://localhost:3000`. Set `NEXT_PUBLIC_API_URL` only when the API is
-not at `http://localhost:8000`. `EXAMPLE10_CORS_ORIGINS` defaults to the local
-Next.js origin; set it to a comma-separated explicit origin allow-list for
-other deployments. The Next.js development configuration also permits
+not at `http://localhost:8000`. `EXAMPLE10_CORS_ORIGINS` defaults to both
+`http://localhost:3000` and `http://127.0.0.1:3000`; set it to a comma-separated
+explicit origin allow-list for other deployments. The Next.js development configuration also permits
 `127.0.0.1` for its local HMR resources; restart `npm run dev` after changing
 the configuration.
 

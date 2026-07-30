@@ -20,6 +20,8 @@ features through a browser while keeping all OCI and ADB access on the server.
 * The API configures explicit local CORS origins through `EXAMPLE10_CORS_ORIGINS`.
   The Next.js development server explicitly permits local `127.0.0.1` HMR
   requests through `allowedDevOrigins`.
+* The frontend navigation switches between distinct Threads, Conversation, and
+  Search views; it does not merely scroll the current page.
 * Oracle/ADB configuration remains server-side and uses `common.py` helpers.
   No browser bundle, frontend environment variable, log, or API response may
   expose credentials or OCI profile values.

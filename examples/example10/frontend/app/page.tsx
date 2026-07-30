@@ -1,14 +1,75 @@
 "use client";
+
 import { FormEvent, useEffect, useState } from "react";
 import "./styles.css";
+
 const api = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
-type Thread={thread_id:string;latest_message_timestamp:string}; type Message={role:string;content:string;timestamp:string};
-export default function Console(){const [user,setUser]=useState("user1"),[threads,setThreads]=useState<Thread[]>([]),[selected,setSelected]=useState(""),[messages,setMessages]=useState<Message[]>([]),[insights,setInsights]=useState({summary:"",context_card:""}),[query,setQuery]=useState(""),[results,setResults]=useState<any[]>([]),[content,setContent]=useState(""),[role,setRole]=useState("user"),[notice,setNotice]=useState("");
-const get=async(path:string)=>{const r=await fetch(api+path);if(!r.ok)throw Error((await r.json()).detail);return r.json()};
-const load=async()=>{try{const data=await get(`/api/users/${encodeURIComponent(user)}/threads`);setThreads(data);setNotice(data.length?"":"No populated threads for this user.")}catch(e:any){setNotice(e.message)}};
-useEffect(()=>{load()},[]); useEffect(()=>{if(selected)get(`/api/users/${encodeURIComponent(user)}/threads/${selected}/messages`).then(setMessages).catch(e=>setNotice(e.message))},[selected]);
-const create=async()=>{const r=await fetch(`${api}/api/users/${encodeURIComponent(user)}/threads`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({})});const d=await r.json();setSelected(d.thread_id);setNotice("Thread created. Add its first message to make it visible.")};
-const add=async(e:FormEvent)=>{e.preventDefault();if(!selected||!content)return; await fetch(`${api}/api/users/${encodeURIComponent(user)}/threads/${selected}/messages`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({role,content})});setContent("");await load();setMessages(await get(`/api/users/${encodeURIComponent(user)}/threads/${selected}/messages`))};
-const showInsights=async()=>setInsights(await get(`/api/users/${encodeURIComponent(user)}/threads/${selected}/insights`));
-const search=async(e:FormEvent)=>{e.preventDefault();setResults(await get(`/api/users/${encodeURIComponent(user)}/messages/search?q=${encodeURIComponent(query)}`))};
-return <main><aside><div className="brand">◈ Memory<br/><small>Console</small></div><button onClick={load}>Threads</button><button onClick={()=>document.getElementById("search")?.scrollIntoView()}>Search</button><div className="scope"><label>User scope</label><input value={user} onChange={e=>setUser(e.target.value)}/><button onClick={load}>Apply</button></div></aside><section><header><div><p className="eyebrow">ORACLE AGENT MEMORY</p><h1>Conversation workspace</h1></div><button className="primary" onClick={create}>+ New thread</button></header>{notice&&<p className="notice">{notice}</p>}<div className="grid"><article className="panel"><h2>Recent threads</h2><table><thead><tr><th>Thread</th><th>Last message</th></tr></thead><tbody>{threads.map(t=><tr className={selected===t.thread_id?"active":""} onClick={()=>setSelected(t.thread_id)} key={t.thread_id}><td>{t.thread_id}</td><td>{new Date(t.latest_message_timestamp).toLocaleString()}</td></tr>)}</tbody></table></article><article className="panel"><h2>{selected?"Thread messages":"Select a thread"}</h2><div className="messages">{messages.map((m,i)=><div className={`message ${m.role}`} key={i}><b>{m.role}</b><p>{m.content}</p></div>)}</div><form onSubmit={add}><select value={role} onChange={e=>setRole(e.target.value)}><option>user</option><option>assistant</option></select><input value={content} onChange={e=>setContent(e.target.value)} placeholder="Write a message…"/><button className="primary">Send</button></form></article></div>{selected&&<article className="panel insights"><div><h2>Thread intelligence</h2><p>Generate the current summary and Context Card.</p></div><button className="primary" onClick={showInsights}>Generate</button>{insights.summary&&<><h3>Summary</h3><p>{insights.summary}</p><h3>Context Card</h3><p>{insights.context_card}</p></>}</article>}<article id="search" className="panel"><h2>Scoped message search</h2><form onSubmit={search}><input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search this user's messages"/><button className="primary">Search</button></form>{results.map((r,i)=><div className="result" key={i}><b>{r.role}</b> · {r.content}<small>{r.thread_id}</small></div>)}</article></section></main>}
+type View = "threads" | "conversation" | "search";
+type Thread = { thread_id: string; latest_message_timestamp: string };
+type Message = { role: string; content: string; timestamp: string };
+type SearchResult = Message & { thread_id: string };
+
+async function request(path: string, options?: RequestInit) {
+  const response = await fetch(`${api}${path}`, options);
+  const body = await response.json();
+  if (!response.ok) throw new Error(body.detail || "Request failed.");
+  return body;
+}
+
+export default function Console() {
+  const [view, setView] = useState<View>("threads");
+  const [user, setUser] = useState("user1");
+  const [threads, setThreads] = useState<Thread[]>([]);
+  const [selected, setSelected] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [content, setContent] = useState("");
+  const [role, setRole] = useState("user");
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [insights, setInsights] = useState({ summary: "", context_card: "" });
+  const [notice, setNotice] = useState("");
+
+  const loadThreads = async () => {
+    try {
+      const data = await request(`/api/users/${encodeURIComponent(user)}/threads`);
+      setThreads(data);
+      setNotice(data.length ? "" : "No populated threads found for this user.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to load threads."); }
+  };
+  const selectThread = async (threadId: string) => {
+    setSelected(threadId); setView("conversation"); setInsights({ summary: "", context_card: "" });
+    try { setMessages(await request(`/api/users/${encodeURIComponent(user)}/threads/${threadId}/messages`)); }
+    catch (error) { setNotice(error instanceof Error ? error.message : "Unable to load messages."); }
+  };
+  useEffect(() => { loadThreads(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  const createThread = async () => {
+    try {
+      const data = await request(`/api/users/${encodeURIComponent(user)}/threads`, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
+      setSelected(data.thread_id); setMessages([]); setView("conversation"); setNotice("Thread created. Add its first message to make it visible in Recent threads.");
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to create thread."); }
+  };
+  const addMessage = async (event: FormEvent) => {
+    event.preventDefault(); if (!selected || !content.trim()) return;
+    try {
+      await request(`/api/users/${encodeURIComponent(user)}/threads/${selected}/messages`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ role, content }) });
+      setContent(""); await loadThreads(); await selectThread(selected);
+    } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to add message."); }
+  };
+  const generateInsights = async () => {
+    try { setInsights(await request(`/api/users/${encodeURIComponent(user)}/threads/${selected}/insights`)); }
+    catch (error) { setNotice(error instanceof Error ? error.message : "Unable to generate insights."); }
+  };
+  const search = async (event: FormEvent) => {
+    event.preventDefault(); if (!query.trim()) return;
+    try { setResults(await request(`/api/users/${encodeURIComponent(user)}/messages/search?q=${encodeURIComponent(query)}`)); }
+    catch (error) { setNotice(error instanceof Error ? error.message : "Unable to search messages."); }
+  };
+  return <main><aside><div className="brand">◈ Memory<br /><small>Console</small></div>
+    {(["threads", "conversation", "search"] as View[]).map((item) => <button className={view === item ? "nav-active" : ""} onClick={() => setView(item)} key={item}>{item === "threads" ? "Recent threads" : item === "conversation" ? "Conversation" : "Search messages"}</button>)}
+    <div className="scope"><label>User scope</label><input value={user} onChange={(event) => setUser(event.target.value)} /><button onClick={() => { setSelected(""); setMessages([]); loadThreads(); }}>Apply scope</button></div></aside>
+    <section><header><div><p className="eyebrow">ORACLE AGENT MEMORY</p><h1>{view === "threads" ? "Recent conversations" : view === "conversation" ? "Conversation workspace" : "Scoped message search"}</h1></div><button className="primary" onClick={createThread}>+ New thread</button></header>{notice && <p className="notice">{notice}</p>}
+      {view === "threads" && <article className="panel"><h2>Threads for {user}</h2><table><thead><tr><th>Thread</th><th>Last message</th></tr></thead><tbody>{threads.map((thread) => <tr onClick={() => selectThread(thread.thread_id)} key={thread.thread_id}><td>{thread.thread_id}</td><td>{new Date(thread.latest_message_timestamp).toLocaleString()}</td></tr>)}</tbody></table></article>}
+      {view === "conversation" && <article className="panel"><h2>{selected ? `Thread ${selected}` : "Select or create a thread"}</h2><div className="messages">{messages.map((message, index) => <div className={`message ${message.role}`} key={index}><b>{message.role}</b><p>{message.content}</p></div>)}</div><form onSubmit={addMessage}><select value={role} onChange={(event) => setRole(event.target.value)}><option>user</option><option>assistant</option></select><input value={content} onChange={(event) => setContent(event.target.value)} placeholder="Write a message…" /><button className="primary">Send</button></form>{selected && <div className="insights"><button className="primary" onClick={generateInsights}>Generate summary & Context Card</button>{insights.summary && <><h3>Summary</h3><p>{insights.summary}</p><h3>Context Card</h3><p>{insights.context_card}</p></>}</div>}</article>}
+      {view === "search" && <article className="panel"><h2>Search only {user}&apos;s messages</h2><form onSubmit={search}><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search this user's messages" /><button className="primary">Search</button></form>{results.map((result, index) => <div className="result" key={index}><b>{result.role}</b> · {result.content}<small>{result.thread_id}</small></div>)}</article>}
+    </section></main>;
+}
