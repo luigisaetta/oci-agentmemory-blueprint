@@ -61,19 +61,26 @@ export default function Console() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [insights, setInsights] = useState({ summary: "", context_card: "" });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isLoadingThreads, setIsLoadingThreads] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
   const [notice, setNotice] = useState("");
 
   const loadThreads = async () => {
+    setIsLoadingThreads(true);
     try {
       const data = await request(`/api/users/${encodeURIComponent(user)}/threads`);
       setThreads(data);
       setNotice(data.length ? "" : "No populated threads found for this user.");
     } catch (error) { setNotice(error instanceof Error ? error.message : "Unable to load threads."); }
+    finally { setIsLoadingThreads(false); }
   };
   const selectThread = async (threadId: string) => {
     setSelected(threadId); setView("thread"); setInsights({ summary: "", context_card: "" });
+    setIsLoadingMessages(true);
     try { setMessages(await request(`/api/users/${encodeURIComponent(user)}/threads/${threadId}/messages`)); }
     catch (error) { setNotice(error instanceof Error ? error.message : "Unable to load messages."); }
+    finally { setIsLoadingMessages(false); }
   };
   useEffect(() => { loadThreads(); }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const createThread = async () => {
@@ -97,15 +104,21 @@ export default function Console() {
   };
   const search = async (event: FormEvent) => {
     event.preventDefault(); if (!query.trim()) return;
+    setIsSearching(true); setResults([]);
     try { setResults(await request(`/api/users/${encodeURIComponent(user)}/messages/search?q=${encodeURIComponent(query)}`)); }
     catch (error) { setNotice(error instanceof Error ? error.message : "Unable to search messages."); }
+    finally { setIsSearching(false); }
+  };
+  const applyUserScope = () => {
+    setSelected(""); setThreads([]); setMessages([]); setInsights({ summary: "", context_card: "" });
+    setResults([]); setQuery(""); setContent(""); setNotice(""); loadThreads();
   };
   return <main><aside><div className="brand">◈ Memory<br /><small>Console</small></div>
     {(["threads", "thread", "search"] as View[]).map((item) => <button className={view === item ? "nav-active" : ""} onClick={() => setView(item)} key={item}>{item === "threads" ? "Recent threads" : item === "thread" ? "Thread" : "Search messages"}</button>)}
-    <div className="scope"><label>User scope</label><input value={user} onChange={(event) => setUser(event.target.value)} /><button onClick={() => { setSelected(""); setMessages([]); loadThreads(); }}>Apply scope</button></div></aside>
+    <div className="scope"><label>User scope</label><input value={user} onChange={(event) => setUser(event.target.value)} /><button onClick={applyUserScope} disabled={isLoadingThreads}>Apply scope</button></div></aside>
     <section><header><div><p className="eyebrow">ORACLE AGENT MEMORY</p><h1>{view === "threads" ? "Recent threads" : view === "thread" ? "Thread workspace" : "Scoped message search"}</h1></div><button className="primary" onClick={createThread}>+ New thread</button></header>{notice && <p className="notice">{notice}</p>}
-      {view === "threads" && <article className="panel"><h2>Threads for {user}</h2><table><thead><tr><th>Thread</th><th>Last message</th></tr></thead><tbody>{threads.map((thread) => <tr onClick={() => selectThread(thread.thread_id)} key={thread.thread_id}><td>{thread.thread_id}</td><td>{new Date(thread.latest_message_timestamp).toLocaleString()}</td></tr>)}</tbody></table></article>}
-      {view === "thread" && <article className="panel"><h2>{selected ? `Thread ${selected}` : "Select or create a thread"}</h2><div className="messages">{messages.map((message, index) => <div className={`message ${message.role}`} key={index}><b>{message.role}</b><p>{message.content}</p></div>)}</div><form onSubmit={addMessage}><select value={role} onChange={(event) => setRole(event.target.value)}><option>user</option><option>assistant</option></select><input value={content} onChange={(event) => setContent(event.target.value)} placeholder="Write a message…" /><button className="primary">Send</button></form>{selected && <div className="insights"><button className="primary" onClick={generateInsights} disabled={isGenerating}>{isGenerating ? <><span className="spinner" aria-hidden="true" />Generating insights…</> : "Generate Summary & Context Card"}</button>{isGenerating && <p className="generating">Creating a summary and structured Context Card from this thread…</p>}{insights.summary && <><h3>Summary</h3><p>{insights.summary}</p><h3>Context Card</h3><ContextCard content={insights.context_card} /></>}</div>}</article>}
-      {view === "search" && <article className="panel"><h2>Search only {user}&apos;s messages</h2><form onSubmit={search}><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search this user's messages" /><button className="primary">Search</button></form>{results.map((result, index) => <div className="result" key={index}><b>{result.role}</b> · {result.content}<small>{result.thread_id}</small></div>)}</article>}
+      {view === "threads" && <article className="panel"><h2>Threads for {user}</h2>{isLoadingThreads ? <p className="loading"><span className="spinner dark" aria-hidden="true" />Loading threads…</p> : <table><thead><tr><th>Thread</th><th>Last message</th></tr></thead><tbody>{threads.map((thread) => <tr onClick={() => selectThread(thread.thread_id)} key={thread.thread_id}><td>{thread.thread_id}</td><td>{new Date(thread.latest_message_timestamp).toLocaleString()}</td></tr>)}</tbody></table>}</article>}
+      {view === "thread" && <article className="panel"><h2>{selected ? `Thread ${selected}` : "Select or create a thread"}</h2>{isLoadingMessages ? <p className="loading"><span className="spinner dark" aria-hidden="true" />Loading messages…</p> : <div className="messages">{messages.map((message, index) => <div className={`message ${message.role}`} key={index}><b>{message.role}</b><p>{message.content}</p></div>)}</div>}<form onSubmit={addMessage}><select value={role} onChange={(event) => setRole(event.target.value)}><option>user</option><option>assistant</option></select><input value={content} onChange={(event) => setContent(event.target.value)} placeholder="Write a message…" /><button className="primary">Send</button></form>{selected && <div className="insights"><button className="primary" onClick={generateInsights} disabled={isGenerating}>{isGenerating ? <><span className="spinner" aria-hidden="true" />Generating insights…</> : "Generate Summary & Context Card"}</button>{isGenerating && <p className="generating">Creating a summary and structured Context Card from this thread…</p>}{insights.summary && <><h3>Summary</h3><p>{insights.summary}</p><h3>Context Card</h3><ContextCard content={insights.context_card} /></>}</div>}</article>}
+      {view === "search" && <article className="panel"><h2>Search only {user}&apos;s messages</h2><form onSubmit={search}><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search this user's messages" /><button className="primary" disabled={isSearching}>{isSearching ? <><span className="spinner" aria-hidden="true" />Searching…</> : "Search"}</button></form>{isSearching && <p className="loading">Searching the selected user&apos;s messages…</p>}{results.map((result, index) => <div className="result" key={index}><b>{result.role}</b> · {result.content}<small>{result.thread_id}</small></div>)}</article>}
     </section></main>;
 }
