@@ -51,3 +51,24 @@ Add `langchain-oci` to `environment.yml` and the example backend requirements.
 Unit tests must mock the ADB/Agent Memory and LangChain OCI boundaries, proving
 thread ordering and truncation, ownership, model history construction,
 user/assistant persistence order, errors, and cleanup.
+
+## Frontend
+
+Add a separate Next.js frontend in `examples/example11/frontend/` that consumes
+the FastAPI API. It provides a ChatGPT-like layout with a persistent left
+sidebar and central chat panel.
+
+* The top sidebar area contains a `username` input mapped directly to the API
+  `user_id`, an Apply button, and a New Thread action.
+* The bottom sidebar lists the selected user's recent populated threads. A
+  click resumes its history through the backend API.
+* The central panel displays chronological `user` and `assistant` messages and
+  submits questions to the selected thread. The send control displays progress
+  while the model is working and prevents duplicate submissions.
+* Assistant content is rendered as untrusted Markdown with GitHub-Flavored
+  Markdown support, including headings, tables, lists, and code blocks. User
+  content remains plain text.
+* Applying a different username clears the selected thread, prior messages,
+  input, and visible errors before loading that user's thread list.
+* `NEXT_PUBLIC_API_URL` optionally overrides the default API URL
+  `http://127.0.0.1:8001`.

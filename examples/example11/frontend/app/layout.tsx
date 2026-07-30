@@ -1,0 +1,11 @@
+import type { Metadata } from "next";
+import "./styles.css";
+
+export const metadata: Metadata = {
+  title: "Thread Chatbot",
+  description: "Example 11 Oracle Agent Memory chatbot",
+};
+
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  return <html lang="en"><body>{children}</body></html>;
+}

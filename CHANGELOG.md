@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+* Added the Example 11 Next.js ChatGPT-like frontend with thread resume, scoped
+  thread navigation, and GitHub-Flavored Markdown assistant responses.
 * Added the Example 11 FastAPI backend startup script and local run guidance.
 * Added the Example 11 FastAPI chatbot backend, specifications, tests, and
   `langchain-oci` dependency for durable, user-scoped thread chat without RAG.

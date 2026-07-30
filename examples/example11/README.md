@@ -1,10 +1,10 @@
 # Example 11: Thread Chatbot Backend
 
-Example 11 begins with a FastAPI backend for a durable, user-scoped chatbot.
+Example 11 is a durable, user-scoped chatbot with a FastAPI backend and a
+separate Next.js frontend.
 Oracle Agent Memory persists the user and assistant messages in ADB-backed
 threads. `langchain-oci` invokes OCI Generative AI to produce the assistant
 answer from the persisted thread history and the model's pretrained knowledge.
-A separate frontend will be added later.
 
 ## Operations
 
@@ -62,3 +62,16 @@ The script binds to `127.0.0.1:8001` by default. Set `EXAMPLE11_API_HOST` or
 port. The API documentation is available at `http://127.0.0.1:8001/docs`.
 The configured model must be available in `GENAI_REGION` and the profile
 principal must be allowed to invoke it.
+
+In a second terminal, start the ChatGPT-like frontend:
+
+```bash
+cd examples/example11/frontend
+npm install
+npm run dev
+```
+
+Open `http://127.0.0.1:3000`. The username input maps to the backend `user_id`;
+applying a new username clears the current chat and loads that user's recent
+threads. `NEXT_PUBLIC_API_URL` defaults to `http://127.0.0.1:8001` and can be
+set when the backend is served elsewhere.

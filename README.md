@@ -49,7 +49,7 @@ Each example will explain its use case, architecture, configuration, expected be
 | [Example 05: Search Customer-Support Messages by User Scope](examples/example05/README.md) | Stores two overlapping support conversations and demonstrates rejected unscoped versus user-scoped message searches. |
 | [Example 06: List a User's Populated Threads](examples/example06/README.md) | Lists the most recent conversation threads associated with a specified user. |
 | [Example 10: Agent Memory Console](examples/example10/README.md) | Provides a FastAPI and Next.js UI for user-scoped threads, messages, summaries, Context Cards, and search. |
-| [Example 11: Thread Chatbot Backend](examples/example11/README.md) | Provides a FastAPI chatbot backend that resumes ADB-backed threads and uses `langchain-oci` for contextual OCI model responses without RAG. |
+| [Example 11: Thread Chatbot](examples/example11/README.md) | Provides a FastAPI and Next.js chatbot that resumes ADB-backed threads and uses `langchain-oci` for contextual OCI model responses without RAG. |
 | [ADB connection check](examples/test_adb_connections/test_db_connection.py) | Validates the local wallet-based ADB configuration with `SELECT 1 FROM dual` before running a memory example. |
 
 ## Who this is for
