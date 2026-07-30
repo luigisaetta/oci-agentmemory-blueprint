@@ -48,8 +48,8 @@ def test_list_populated_threads_uses_workaround_and_recent_activity_order() -> N
         record_type="message", user_id="user1", limit=None
     )
     assert activities == [
-        example06.ThreadActivity("thread-a", "2026-07-30T13:00:00Z"),
-        example06.ThreadActivity("thread-b", "2026-07-30T11:00:00Z"),
+        example06.ThreadActivity("thread-a", "2026-07-30T13:00:00Z", 2),
+        example06.ThreadActivity("thread-b", "2026-07-30T11:00:00Z", 1),
     ]
 
 
@@ -117,7 +117,7 @@ def test_main_logs_populated_threads_and_closes_pool(
 ) -> None:
     """List the requested user scope and close the pool on success."""
     connection_pool = Mock()
-    activities = [example06.ThreadActivity("thread-1", "2026-07-30T10:00:00Z")]
+    activities = [example06.ThreadActivity("thread-1", "2026-07-30T10:00:00Z", 1)]
     list_threads = Mock(return_value=activities)
     monkeypatch.setattr(example06, "create_connection_pool", lambda: connection_pool)
     monkeypatch.setattr(example06, "load_oci_settings", lambda: VALID_OCI_SETTINGS)

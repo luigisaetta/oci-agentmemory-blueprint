@@ -30,9 +30,9 @@ thread_ids = {
 }
 ```
 
-It then finds the most recent timestamp among each thread's messages and sorts
-the thread IDs in descending order. When two threads have the same newest
-timestamp, their IDs provide a stable secondary ordering.
+It then finds the most recent timestamp and counts the messages in each thread,
+sorting the thread IDs in descending order. When two threads have the same
+newest timestamp, their IDs provide a stable secondary ordering.
 
 Only threads with messages appear. Empty threads cannot be discovered by this
 message-based workaround. The private `_store` attribute is version-sensitive:

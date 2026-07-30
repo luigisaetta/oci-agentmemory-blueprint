@@ -22,8 +22,9 @@ in each thread, newest first.
   threads are intentionally absent because the workaround discovers threads
   through message records.
 * The function determines each listed thread's activity time from the latest
-  message timestamp and returns entries in descending activity order. Ties are
-  resolved deterministically by thread ID.
+  message timestamp, includes its persisted message count, and returns entries
+  in descending activity order. Ties are resolved deterministically by thread
+  ID.
 * The command logs each thread ID and its latest-message timestamp, or a clear
   informational message when no populated thread exists for the user.
 * The ADB pool closes after success and all handled failures.

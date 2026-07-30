@@ -12,7 +12,8 @@ features through a browser while keeping all OCI and ADB access on the server.
 * The browser supplies a user scope; the backend exposes only user-scoped
   thread, message, context-card, summary, and message-search operations.
 * Users can create a thread, append `user` or `assistant` messages, list
-  populated threads by their latest message descending, select a thread, and
+  populated threads by their latest message descending with a message count,
+  select a thread, and
   view its messages, summary, and Context Card.
 * A message search requires `user_id` and searches only `message` records.
 * Thread discovery uses the message-record workaround from Example 06; only

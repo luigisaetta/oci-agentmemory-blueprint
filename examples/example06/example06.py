@@ -37,10 +37,12 @@ class ThreadActivity:
     Attributes:
         thread_id: Identifier of the persisted conversation thread.
         latest_message_timestamp: UTC timestamp supplied with its newest message.
+        message_count: Number of persisted messages in the thread.
     """
 
     thread_id: str
     latest_message_timestamp: str
+    message_count: int
 
 
 def create_memory_store(
@@ -104,8 +106,8 @@ def list_populated_threads(
 ) -> list[ThreadActivity]:
     """List a user's message-bearing threads by newest message first.
 
-    This function uses a temporary workaround for the absence of a supported 
-    thread-listing API. It intentionally uses the private store only 
+    This function uses a temporary workaround for the absence of a supported
+    thread-listing API. It intentionally uses the private store only
     to discover raw message records belonging to the selected user.
 
     Args:
@@ -129,23 +131,33 @@ def list_populated_threads(
         message.thread_id for message in messages if message.thread_id is not None
     }
 
-    latest_messages: dict[object, tuple[datetime, str]] = {}
+    latest_messages: dict[object, tuple[datetime, str, int]] = {}
     for message in messages:
         if message.thread_id not in thread_ids:
             continue
         message_timestamp = parse_timestamp(message.timestamp)
         latest_for_thread = latest_messages.get(message.thread_id)
+        message_count = 1 if latest_for_thread is None else latest_for_thread[2] + 1
         if latest_for_thread is None or message_timestamp > latest_for_thread[0]:
             latest_messages[message.thread_id] = (
                 message_timestamp,
                 message.timestamp,
+                message_count,
+            )
+        else:
+            latest_messages[message.thread_id] = (
+                latest_for_thread[0],
+                latest_for_thread[1],
+                message_count,
             )
 
     activities = [
         ThreadActivity(
-            thread_id=str(thread_id), latest_message_timestamp=latest_timestamp
+            thread_id=str(thread_id),
+            latest_message_timestamp=latest_timestamp,
+            message_count=message_count,
         )
-        for thread_id, (_, latest_timestamp) in latest_messages.items()
+        for thread_id, (_, latest_timestamp, message_count) in latest_messages.items()
     ]
     return sorted(
         activities,
