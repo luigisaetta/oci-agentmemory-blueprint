@@ -47,6 +47,7 @@ Each example will explain its use case, architecture, configuration, expected be
 | [Example 03: Use Resource Principal with Oracle Agent Memory](examples/example03/README.md) | Uses OCI Resource Principal authentication for OCI Generative AI while retaining ADB-backed memory persistence. |
 | [Example 04: Recreate an Oracle Agent Memory Schema](examples/example04/README.md) | Performs an explicit, destructive reset of the managed store selected by `MEMORY_STORE_ID` for development or approved maintenance. |
 | [Example 05: Search Customer-Support Messages by User Scope](examples/example05/README.md) | Stores two overlapping support conversations and demonstrates rejected unscoped versus user-scoped message searches. |
+| [Example 06: List a User's Populated Threads](examples/example06/README.md) | Lists a user's message-bearing conversation threads by most recent message, using a temporary private-store workaround. |
 | [ADB connection check](examples/test_adb_connections/test_db_connection.py) | Validates the local wallet-based ADB configuration with `SELECT 1 FROM dual` before running a memory example. |
 
 ## Who this is for
@@ -63,12 +64,13 @@ This blueprint is intended for AI application developers, solution architects, a
 
 ## Repository status
 
-The blueprint currently includes a local ADB connection check and five
+The blueprint currently includes a local ADB connection check and six
 progressive Oracle Agent Memory examples. Together, they cover creating an
 ADB-backed memory client and thread, persisting conversation messages,
 retrieving a Context Card for a subsequent LLM turn, using OCI Resource
 Principal authentication for Generative AI, safely recreating a managed memory
-store for approved maintenance, and enforcing user-scoped raw-message search.
+store for approved maintenance, enforcing user-scoped raw-message search, and
+listing a user's recent populated threads.
 
 The examples make the persistence boundary, short-term conversation state,
 background long-term-memory extraction, authentication, destructive

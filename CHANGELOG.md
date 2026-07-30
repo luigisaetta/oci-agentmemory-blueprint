@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+* Added Example 06, specifications, documentation, and unit tests for listing
+  a user's populated threads in reverse chronological message activity order.
 * Added root-level Oracle Agent Memory best-practice guidance for deliberate
   `MEMORY_STORE_ID` selection and production ADB connection-pool sizing.
 * Added Example 05, which persists two overlapping customer-support threads
