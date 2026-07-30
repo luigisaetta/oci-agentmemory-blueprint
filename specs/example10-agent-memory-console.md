@@ -4,7 +4,7 @@
 
 Add a two-tier demonstration application: a FastAPI backend in
 `examples/example10/backend/` and a Next.js frontend in
-`examples/example10/frontend/`. It presents Oracle Agent Memory conversation
+`examples/example10/frontend/`. It presents Oracle Agent Memory thread
 features through a browser while keeping all OCI and ADB access on the server.
 
 ## Behaviour
@@ -20,11 +20,14 @@ features through a browser while keeping all OCI and ADB access on the server.
 * The API configures explicit local CORS origins through `EXAMPLE10_CORS_ORIGINS`.
   The Next.js development server explicitly permits local `127.0.0.1` HMR
   requests through `allowedDevOrigins`.
-* The frontend navigation switches between distinct Threads, Conversation, and
+* The frontend navigation switches between distinct Recent Threads, Thread, and
   Search views; it does not merely scroll the current page.
 * Summary and Context Card generation displays an in-progress state until the
   API responds. The XML-like Context Card is rendered as an expandable
   structured tree, with a raw-text fallback for malformed or non-XML content.
+* `backend/start_server.sh` starts the FastAPI server from any working
+  directory, using Uvicorn reload mode and optional `EXAMPLE10_API_HOST` and
+  `EXAMPLE10_API_PORT` overrides.
 * Oracle/ADB configuration remains server-side and uses `common.py` helpers.
   No browser bundle, frontend environment variable, log, or API response may
   expose credentials or OCI profile values.

@@ -35,7 +35,7 @@ CORS_ORIGINS = os.getenv(
 
 
 class ThreadCreate(BaseModel):
-    """Input used to create a user-owned conversation thread."""
+    """Input used to create a user-owned thread."""
 
     agent_id: str = Field(default="console_agent", min_length=1, max_length=100)
 

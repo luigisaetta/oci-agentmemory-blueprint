@@ -6,6 +6,7 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+* Added an Example 10 backend startup script for local Uvicorn development.
 * Added Example 10, a FastAPI and Next.js Agent Memory Console for scoped
   thread creation, messages, thread insights, search, and recent-thread lists.
 * Added Example 06, specifications, documentation, and unit tests for listing

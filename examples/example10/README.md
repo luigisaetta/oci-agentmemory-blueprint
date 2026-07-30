@@ -22,8 +22,12 @@ backend additions and start the API:
 ```bash
 conda activate oci-agentmemory-blueprint
 pip install -r examples/example10/backend/requirements.txt
-uvicorn examples.example10.backend.app:app --reload
+./examples/example10/backend/start_server.sh
 ```
+
+The script binds to `127.0.0.1:8000` by default. Set `EXAMPLE10_API_HOST` or
+`EXAMPLE10_API_PORT` before invoking it when a different local bind address or
+port is required.
 
 In a second terminal:
 
