@@ -26,8 +26,9 @@ features through a browser while keeping all OCI and ADB access on the server.
   No browser bundle, frontend environment variable, log, or API response may
   expose credentials or OCI profile values.
 * The backend creates one connection pool per request and always closes it.
-  Automatic memory extraction is disabled; summary and Context Card operate on
-  persisted conversation state and the UI does not create long-term memories.
+  Automatic long-term memory extraction runs in background mode after message
+  writes, so derived memories may not be immediately available. An OCI LLM is
+  also configured for summary and Context Card generation.
 
 ## API
 

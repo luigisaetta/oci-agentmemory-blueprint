@@ -45,8 +45,10 @@ the configuration.
 ## Persistence and security
 
 Messages and thread state are persisted in the store selected by
-`MEMORY_STORE_ID`; automatic long-term memory extraction is disabled. Summary
-and Context Card are calculated from the selected persisted thread. The
+`MEMORY_STORE_ID`. Automatic long-term memory extraction runs in the background
+after a message write, so derived memories can appear after the UI has already
+returned a successful response. Summary and Context Card are calculated from
+the selected persisted thread using the configured OCI LLM. The
 browser-provided user ID is only a demo retrieval scope, not authentication:
 production systems must derive user and tenant scope from the authenticated
 principal. The backend opens and closes an ADB pool for every request.

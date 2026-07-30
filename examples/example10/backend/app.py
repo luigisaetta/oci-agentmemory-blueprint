@@ -14,15 +14,21 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from oracleagentmemory.apis import Message
-from oracleagentmemory.core import MemoryExtractionConfig, OracleAgentMemory
+from oracleagentmemory.core import (
+    MemoryExtractionConfig,
+    MemoryExtractionMode,
+    OracleAgentMemory,
+)
 from oracleagentmemory.core.dbschemapolicy import SchemaPolicy
 from oracleagentmemory.core.embedders.embedder import Embedder
+from oracleagentmemory.core.llms.llm import Llm
 
 from common import create_connection_pool, load_memory_store_id, load_oci_settings
 from examples.example06.example06 import list_populated_threads
 
 APP_NAME = "Example 10 Agent Memory Console"
 EMBEDDING_MODEL_ID = "oci/cohere.embed-multilingual-v3.0"
+LLM_MODEL_ID = "oci/openai.gpt-oss-120b"
 CORS_ORIGINS = os.getenv(
     "EXAMPLE10_CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
 ).split(",")
@@ -42,7 +48,11 @@ class MessageCreate(BaseModel):
 
 
 def create_memory_store(pool: oracledb.ConnectionPool) -> OracleAgentMemory:
-    """Create an ADB-backed client without automatic long-term extraction."""
+    """Create an ADB-backed client for thread retrieval and insights.
+
+    Long-term extraction runs in the background, while the LLM is also
+    available for the selected thread's summary and Context Card.
+    """
     settings = load_oci_settings()
     arguments = {
         "oci_compartment_id": settings["compartment_id"],
@@ -55,9 +65,13 @@ def create_memory_store(pool: oracledb.ConnectionPool) -> OracleAgentMemory:
     return OracleAgentMemory(
         connection=pool,
         embedder=Embedder(model=EMBEDDING_MODEL_ID, **arguments),
+        llm=Llm(model=LLM_MODEL_ID, **arguments),
         schema_policy=SchemaPolicy.CREATE_IF_NECESSARY,
         memory_store_id=load_memory_store_id(),
-        memory_extraction_config=MemoryExtractionConfig(extract_memories=False),
+        memory_extraction_config=MemoryExtractionConfig(
+            extract_memories=True,
+            extraction_mode=MemoryExtractionMode.BACKGROUND,
+        ),
     )
 
 

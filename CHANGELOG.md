@@ -31,6 +31,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+* Enabled background automatic long-term memory extraction in the Example 10
+  Agent Memory Console.
 * Updated Example 10 to Next.js 16 and pinned patched transitive PostCSS and
   Sharp versions to address frontend dependency advisories.
 * Documented the destructive Example 04 reset procedure for avoiding duplicate
