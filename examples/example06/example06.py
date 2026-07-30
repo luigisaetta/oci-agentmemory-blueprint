@@ -104,9 +104,9 @@ def list_populated_threads(
 ) -> list[ThreadActivity]:
     """List a user's message-bearing threads by newest message first.
 
-    This is a temporary workaround for the absence of a supported thread-listing
-    API. It intentionally uses the private store only to discover raw message
-    records belonging to the selected user.
+    This function uses a temporary workaround for the absence of a supported 
+    thread-listing API. It intentionally uses the private store only 
+    to discover raw message records belonging to the selected user.
 
     Args:
         client: Configured Agent Memory client to query.
@@ -118,6 +118,7 @@ def list_populated_threads(
     Raises:
         ValueError: If a discovered message has an invalid timestamp.
     """
+    # this is the workaround (L.S. 30/07/2026)
     # pylint: disable=protected-access
     messages = client._store.list(
         record_type="message",
@@ -211,7 +212,7 @@ def main(arguments: Sequence[str] | None = None) -> int:
             )
 
         LOGGER.info("Found %s threads.", len(activities))
-        
+
         for activity in activities:
             LOGGER.info(
                 "Thread id=%s latest_message_timestamp=%s",
