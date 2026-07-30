@@ -12,6 +12,8 @@ dependencies:
       - oracledb
       - oracleagentmemory==26.6.0
       - python-dotenv
+      - fastapi
+      - uvicorn[standard]
       # Development and quality tools
       - pytest
       - pytest-cov
