@@ -196,15 +196,22 @@ def main(arguments: Sequence[str] | None = None) -> int:
     connection_pool: oracledb.ConnectionPool | None = None
     try:
         connection_pool = create_connection_pool()
+
         memory = create_memory_store(
             connection_pool, load_oci_settings(), load_memory_store_id()
         )
+
+        # we add the timestamp of the last message to be able to sort threads
         activities = list_populated_threads(memory, parsed_arguments.user_id)
+
         if not activities:
             LOGGER.info(
                 "No populated threads found for user_id=%s.",
                 parsed_arguments.user_id,
             )
+
+        LOGGER.info("Found %s threads.", len(activities))
+        
         for activity in activities:
             LOGGER.info(
                 "Thread id=%s latest_message_timestamp=%s",
