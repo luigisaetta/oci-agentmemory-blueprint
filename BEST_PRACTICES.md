@@ -1,6 +1,6 @@
 # Oracle Agent Memory Best Practices
 
-This guide highlights two operational choices that should be made before
+This guide highlights several operational choices that should be made before
 running an Oracle Agent Memory workload backed by Oracle Autonomous Database
 (ADB).
 
