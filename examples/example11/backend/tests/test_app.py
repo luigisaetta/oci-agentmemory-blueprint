@@ -93,9 +93,14 @@ def test_ask_question_uses_context_card_and_persists_messages(monkeypatch) -> No
     )
     memory = Mock()
     memory.get_thread.return_value = thread
+    connection_pool = Mock()
     model = Mock()
-    model.invoke.return_value = SimpleNamespace(content="Blue is noted.")
-    monkeypatch.setattr(chatbot_app, "with_memory", lambda callback: callback(memory))
+    model.stream.return_value = [
+        SimpleNamespace(content="Blue "),
+        SimpleNamespace(content="is noted."),
+    ]
+    monkeypatch.setattr(chatbot_app, "create_connection_pool", lambda: connection_pool)
+    monkeypatch.setattr(chatbot_app, "create_memory_store", lambda _pool: memory)
     monkeypatch.setattr(chatbot_app, "get_chat_model", lambda: model)
 
     response = TestClient(chatbot_app.app).post(
@@ -103,8 +108,11 @@ def test_ask_question_uses_context_card_and_persists_messages(monkeypatch) -> No
     )
 
     assert response.status_code == 200
-    assert response.json()["answer"] == "Blue is noted."
-    prompt = model.invoke.call_args.args[0]
+    assert "event: token" in response.text
+    assert '"text": "Blue "' in response.text
+    assert '"text": "is noted."' in response.text
+    assert "event: complete" in response.text
+    prompt = model.stream.call_args.args[0]
     assert "<summary>Remember blue.</summary>" in prompt[1].content
     assert prompt[1].content.endswith("Current user question:\nWhat color?")
     persisted = thread.add_messages.call_args.args[0]
@@ -113,6 +121,7 @@ def test_ask_question_uses_context_card_and_persists_messages(monkeypatch) -> No
         "What color?",
         "Blue is noted.",
     ]
+    connection_pool.close.assert_called_once_with()
 
 
 def test_resume_rejects_a_thread_owned_by_another_user(monkeypatch) -> None:

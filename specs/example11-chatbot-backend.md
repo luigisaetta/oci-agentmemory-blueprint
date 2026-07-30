@@ -24,8 +24,9 @@ future frontend will consume this API but is not part of this change.
 * `POST /api/users/{user_id}/threads/{thread_id}/questions` validates that the
   thread belongs to the selected user; obtains its Oracle Agent Memory Context
   Card; builds the model prompt from that card and the new user question; then
-  persists the question and generated assistant answer in that order before
-  returning the answer.
+  streams generated text as server-sent events. After a successful stream it
+  persists the question and complete assistant answer in that order and emits a
+  completion event.
 * `backend/prompts.py` owns the visible, deterministic prompt construction.
   The Context Card is marked as untrusted reference material, while the current
   question remains a separate user message.
@@ -72,3 +73,6 @@ sidebar and central chat panel.
   input, and visible errors before loading that user's thread list.
 * `NEXT_PUBLIC_API_URL` optionally overrides the default API URL
   `http://127.0.0.1:8001`.
+* The chat composer sends on Enter and adds a newline on Shift+Enter. It shows
+  a spinner until the first streamed assistant token arrives, then incrementally
+  renders the Markdown answer.

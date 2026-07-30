@@ -13,7 +13,7 @@ answer from the persisted thread history and the model's pretrained knowledge.
 | Create | `POST /api/users/{user_id}/threads` | Creates a new user-owned thread. |
 | Recent list | `GET /api/users/{user_id}/threads?limit=10` | Lists up to ten populated threads, newest message first. |
 | Resume | `GET /api/users/{user_id}/threads/{thread_id}` | Loads the complete ordered history of an owned thread. |
-| Ask | `POST /api/users/{user_id}/threads/{thread_id}/questions` | Generates and persists a user question followed by the assistant answer. |
+| Ask | `POST /api/users/{user_id}/threads/{thread_id}/questions` | Streams an answer, then persists the user question and completed assistant answer. |
 
 The question body is:
 
@@ -28,6 +28,10 @@ builds the model input from that card plus the current user question. The
 visible prompt construction is in `backend/prompts.py`. It does not use RAG,
 vector search, web lookup, tools, or external retrieval. The model can use only
 that thread-derived context and its pretrained knowledge.
+
+The chat frontend sends a question with Enter (use Shift+Enter for a newline),
+shows a spinner while waiting for the first generated token, and renders the
+assistant Markdown incrementally as it streams.
 
 Thread messages are durable short-term conversation state in the store selected
 by `MEMORY_STORE_ID`. Automatic Agent Memory extraction is disabled. ADB and

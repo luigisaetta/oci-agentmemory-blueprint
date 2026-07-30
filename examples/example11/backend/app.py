@@ -7,12 +7,14 @@ Description: FastAPI chatbot backend using Oracle Agent Memory threads and LangC
 
 from datetime import datetime, timezone
 from functools import lru_cache
+import json
 from pathlib import Path
-from typing import Callable
+from typing import Callable, Iterator
 
 import oracledb
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from langchain_oci import ChatOCIGenAI
 from oracleagentmemory.apis import Message
 from oracleagentmemory.core import MemoryExtractionConfig, OracleAgentMemory
@@ -194,6 +196,19 @@ def text_from_model_response(response: object) -> str:
     raise ValueError("The model returned no text.")
 
 
+def stream_event(event: str, payload: dict[str, str]) -> str:
+    """Encode one server-sent event without exposing internal data.
+
+    Args:
+        event: Event name understood by the frontend.
+        payload: JSON-safe public event data.
+
+    Returns:
+        Encoded SSE event text.
+    """
+    return f"event: {event}\ndata: {json.dumps(payload)}\n\n"
+
+
 app = FastAPI(title=APP_NAME)
 app.add_middleware(
     CORSMiddleware,
@@ -256,25 +271,44 @@ def resume_thread(user_id: str, thread_id: str) -> dict[str, object]:
 @app.post("/api/users/{user_id}/threads/{thread_id}/questions")
 def ask_question(
     user_id: str, thread_id: str, request: QuestionCreate
-) -> dict[str, str]:
-    """Generate and persist an assistant answer using the thread history only."""
+) -> StreamingResponse:
+    """Stream and persist an assistant answer using the thread Context Card."""
     user_id = validate_identifier(user_id, "user_id")
     thread_id = validate_identifier(thread_id, "thread_id")
 
-    def answer(memory: OracleAgentMemory) -> dict[str, str]:
-        thread = get_owned_thread(memory, user_id, thread_id)
-        context_card = thread.get_context_card()
-        response = get_chat_model().invoke(
-            build_chat_prompt(context_card.content, request.question)
-        )
-        answer_text = text_from_model_response(response)
-        timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-        thread.add_messages(
-            [
-                Message(role="user", content=request.question, timestamp=timestamp),
-                Message(role="assistant", content=answer_text, timestamp=timestamp),
-            ]
-        )
-        return {"thread_id": thread_id, "answer": answer_text}
+    def answer_stream() -> Iterator[str]:
+        pool: oracledb.ConnectionPool | None = None
+        try:
+            pool = create_connection_pool()
+            memory = create_memory_store(pool)
+            thread = get_owned_thread(memory, user_id, thread_id)
+            context_card = thread.get_context_card()
+            answer_parts: list[str] = []
+            for chunk in get_chat_model().stream(
+                build_chat_prompt(context_card.content, request.question)
+            ):
+                chunk_content = getattr(chunk, "content", "")
+                if isinstance(chunk_content, str) and chunk_content:
+                    answer_parts.append(chunk_content)
+                    yield stream_event("token", {"text": chunk_content})
 
-    return with_memory(answer)
+            answer_text = "".join(answer_parts).strip()
+            if not answer_text:
+                raise ValueError("The model returned no text.")
+            timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+            thread.add_messages(
+                [
+                    Message(role="user", content=request.question, timestamp=timestamp),
+                    Message(role="assistant", content=answer_text, timestamp=timestamp),
+                ]
+            )
+            yield stream_event("complete", {"thread_id": thread_id})
+        except HTTPException as error:
+            yield stream_event("error", {"detail": str(error.detail)})
+        except Exception:  # pylint: disable=broad-exception-caught
+            yield stream_event("error", {"detail": "Chatbot service is unavailable."})
+        finally:
+            if pool is not None:
+                pool.close()
+
+    return StreamingResponse(answer_stream(), media_type="text/event-stream")
