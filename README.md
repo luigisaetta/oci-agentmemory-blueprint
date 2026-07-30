@@ -15,6 +15,8 @@ The goal is simple: help teams move from a stateless proof of concept to agents 
 
 Start with the [Quick Start](QUICKSTART.md) to configure a local ADB wallet,
 the required `.env` settings, and the OCI profile used by the examples.
+Review [Best Practices](BEST_PRACTICES.md) before selecting a memory-store
+identifier or sizing a production ADB connection pool.
 
 ## Why agent memory matters
 

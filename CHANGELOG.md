@@ -6,6 +6,8 @@ All notable changes to this project are documented in this file.
 
 ### Added
 
+* Added root-level Oracle Agent Memory best-practice guidance for deliberate
+  `MEMORY_STORE_ID` selection and production ADB connection-pool sizing.
 * Added Example 05, which persists two overlapping customer-support threads
   and demonstrates the user-isolation boundary of client-level message search.
 * Added the shared `MEMORY_STORE_ID` environment setting, validation, and test
