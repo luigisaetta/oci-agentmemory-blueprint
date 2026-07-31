@@ -312,8 +312,13 @@ def ask_question(
     def answer_stream() -> Iterator[str]:
         try:
             memory = create_memory_store(get_connection_pool())
+
+            # attach to the thread
             thread = get_owned_thread(memory, user_id, thread_id)
+            # get the context card from the messages thread
             context_card = thread.get_context_card()
+
+            # manage the streaming from the model
             answer_parts: list[str] = []
             for chunk in get_chat_model().stream(
                 build_chat_prompt(context_card.content, request.question)
@@ -324,8 +329,10 @@ def ask_question(
                     yield stream_event("token", {"text": chunk_content})
 
             answer_text = "".join(answer_parts).strip()
+
             if not answer_text:
                 raise ValueError("The model returned no text.")
+
             timestamp = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
             thread.add_messages(
                 [
