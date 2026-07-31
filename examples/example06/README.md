@@ -15,7 +15,8 @@ another user scope.
 
 Oracle Agent Memory does not provide a supported client-level API for listing
 threads in this example's SDK version. The example therefore wraps a temporary
-private-store workaround in `list_populated_threads`:
+private-store workaround in the shared `agent_memory.py` helper,
+`list_populated_threads`:
 
 ```python
 messages = client._store.list(

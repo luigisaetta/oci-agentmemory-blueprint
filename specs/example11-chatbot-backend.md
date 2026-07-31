@@ -27,10 +27,12 @@ future frontend will consume this API but is not part of this change.
   streams generated text as server-sent events. After a successful stream it
   persists the question and complete assistant answer in that order and emits a
   completion event.
-* `backend/prompts.py` owns the visible, deterministic prompt construction.
+* The root-level `chat_prompts.py` module owns the visible, deterministic prompt construction.
   The XML Context Card is passed without additional wrapper tags and marked as
   untrusted reference material, while the current question remains a separate
   user message.
+* Shared populated-thread discovery is imported from root-level
+  `agent_memory.py`; Example 11 does not depend on another example module.
 * The model receives only the Context Card derived from persisted thread state
   and its pretrained knowledge. This example performs no retrieval-augmented
   generation, vector search, web lookup, tool use, or external knowledge

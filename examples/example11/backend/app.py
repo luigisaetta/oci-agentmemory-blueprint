@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-30
+Date last modified: 2026-07-31
 License: MIT
 Description: FastAPI chatbot backend using Oracle Agent Memory threads and LangChain OCI.
 """
@@ -29,8 +29,8 @@ from common import (
     load_memory_store_id,
     load_oci_settings,
 )
-from examples.example06.example06 import list_populated_threads
-from examples.example11.backend.prompts import build_chat_prompt
+from agent_memory import list_populated_threads
+from chat_prompts import build_chat_prompt
 
 APP_NAME = "Example 11 Thread Chatbot"
 EMBEDDING_MODEL_ID = "oci/cohere.embed-multilingual-v3.0"

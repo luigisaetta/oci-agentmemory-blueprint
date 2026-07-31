@@ -25,7 +25,7 @@ The question body is:
 
 The backend obtains the selected thread's Oracle Agent Memory Context Card and
 builds the model input from that card plus the current user question. The
-visible prompt construction is in `backend/prompts.py`. It does not use RAG,
+visible prompt construction is in the shared `chat_prompts.py` module. It does not use RAG,
 vector search, web lookup, tools, or external retrieval. The model can use only
 that thread-derived context and its pretrained knowledge.
 

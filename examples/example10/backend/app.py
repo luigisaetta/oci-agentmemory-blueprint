@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-30
+Date last modified: 2026-07-31
 License: MIT
 Description: FastAPI service for the Example 10 Oracle Agent Memory Console.
 """
@@ -24,7 +24,7 @@ from oracleagentmemory.core.embedders.embedder import Embedder
 from oracleagentmemory.core.llms.llm import Llm
 
 from common import create_connection_pool, load_memory_store_id, load_oci_settings
-from examples.example06.example06 import list_populated_threads
+from agent_memory import list_populated_threads
 
 APP_NAME = "Example 10 Agent Memory Console"
 EMBEDDING_MODEL_ID = "oci/cohere.embed-multilingual-v3.0"

@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Date last modified: 2026-07-30
+Date last modified: 2026-07-31
 License: MIT
 Description: Unit tests for the Example 11 chatbot FastAPI backend.
 """
@@ -11,7 +11,7 @@ from unittest.mock import Mock
 from fastapi.testclient import TestClient
 
 from examples.example11.backend import app as chatbot_app
-from examples.example11.backend.prompts import build_chat_prompt
+from chat_prompts import build_chat_prompt
 
 
 def test_demo_cors_allows_any_origin() -> None:

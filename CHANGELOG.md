@@ -37,6 +37,9 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+* Moved shared populated-thread discovery and chatbot prompt construction into
+  root-level `agent_memory.py` and `chat_prompts.py` modules, removing
+  cross-example implementation dependencies.
 * Made the Example 11 OCI chat endpoint region and model ID configurable
   through `GENAI_REGION` and `GENAI_MODEL_ID`.
 * Enabled background automatic long-term memory extraction in the Example 10

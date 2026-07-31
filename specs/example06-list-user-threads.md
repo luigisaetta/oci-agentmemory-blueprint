@@ -18,6 +18,8 @@ in each thread, newest first.
 * A dedicated function wraps the currently necessary private-store workaround:
   it calls `client._store.list(record_type="message", user_id=user_id,
   limit=None)` and considers only messages whose `thread_id` is not `None`.
+  The shared implementation lives in root-level `agent_memory.py`, so other
+  examples do not depend on Example 06 for thread discovery.
 * A thread is listed only when it has at least one persisted message. Empty
   threads are intentionally absent because the workaround discovers threads
   through message records.
