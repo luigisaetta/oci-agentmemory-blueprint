@@ -5,11 +5,12 @@ License: MIT
 Description: FastAPI chatbot backend using Oracle Agent Memory threads and LangChain OCI.
 """
 
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from functools import lru_cache
 import json
 from pathlib import Path
-from typing import Callable, Iterator
+from typing import AsyncIterator, Callable, Iterator
 
 import oracledb
 from fastapi import FastAPI, HTTPException, Query
@@ -124,8 +125,45 @@ def get_chat_model() -> ChatOCIGenAI:
     )
 
 
+@asynccontextmanager
+async def lifespan(application: FastAPI) -> AsyncIterator[None]:
+    """Create one ADB connection pool for the FastAPI process lifecycle.
+
+    Args:
+        application: FastAPI application that owns the shared pool.
+
+    Yields:
+        Control while the application accepts requests.
+
+    Side Effects:
+        Stores the connection pool in ``application.state`` and closes it at
+        application shutdown.
+    """
+    pool = create_connection_pool()
+    application.state.connection_pool = pool
+    try:
+        yield
+    finally:
+        pool.close()
+
+
+def get_connection_pool() -> oracledb.ConnectionPool:
+    """Return the process-wide ADB pool initialized during application startup.
+
+    Returns:
+        Open Oracle Database connection pool shared by all API requests.
+
+    Raises:
+        RuntimeError: If the FastAPI lifespan has not initialized the pool.
+    """
+    try:
+        return app.state.connection_pool
+    except AttributeError as error:
+        raise RuntimeError("The database pool is not initialized.") from error
+
+
 def with_memory(callback: Callable[[OracleAgentMemory], object]) -> object:
-    """Run an API operation with a short-lived ADB connection pool.
+    """Run an API operation with an Agent Memory client on the shared ADB pool.
 
     Args:
         callback: Operation receiving a configured Agent Memory client.
@@ -136,10 +174,8 @@ def with_memory(callback: Callable[[OracleAgentMemory], object]) -> object:
     Raises:
         HTTPException: With a safe HTTP error for invalid or unavailable services.
     """
-    pool: oracledb.ConnectionPool | None = None
     try:
-        pool = create_connection_pool()
-        return callback(create_memory_store(pool))
+        return callback(create_memory_store(get_connection_pool()))
     except HTTPException:
         raise
     except ValueError as error:
@@ -148,9 +184,6 @@ def with_memory(callback: Callable[[OracleAgentMemory], object]) -> object:
         raise HTTPException(
             status_code=503, detail="Chatbot service is unavailable."
         ) from error
-    finally:
-        if pool is not None:
-            pool.close()
 
 
 def get_owned_thread(memory: OracleAgentMemory, user_id: str, thread_id: str):
@@ -209,7 +242,7 @@ def stream_event(event: str, payload: dict[str, str]) -> str:
     return f"event: {event}\ndata: {json.dumps(payload)}\n\n"
 
 
-app = FastAPI(title=APP_NAME)
+app = FastAPI(title=APP_NAME, lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -277,10 +310,8 @@ def ask_question(
     thread_id = validate_identifier(thread_id, "thread_id")
 
     def answer_stream() -> Iterator[str]:
-        pool: oracledb.ConnectionPool | None = None
         try:
-            pool = create_connection_pool()
-            memory = create_memory_store(pool)
+            memory = create_memory_store(get_connection_pool())
             thread = get_owned_thread(memory, user_id, thread_id)
             context_card = thread.get_context_card()
             answer_parts: list[str] = []
@@ -307,8 +338,5 @@ def ask_question(
             yield stream_event("error", {"detail": str(error.detail)})
         except Exception:  # pylint: disable=broad-exception-caught
             yield stream_event("error", {"detail": "Chatbot service is unavailable."})
-        finally:
-            if pool is not None:
-                pool.close()
 
     return StreamingResponse(answer_stream(), media_type="text/event-stream")

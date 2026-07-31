@@ -45,16 +45,19 @@ future frontend will consume this API but is not part of this change.
 * `backend/start_server.sh` starts the FastAPI server in reload mode from any
   working directory. `EXAMPLE11_API_HOST` and `EXAMPLE11_API_PORT` optionally
   override its default `127.0.0.1:8001` bind address.
-* The backend closes its ADB pool after each request. It maps invalid input to
-  400, out-of-scope threads to 404, and configuration, model, or persistence
-  failures to 503 without leaking credentials or internal errors.
+* FastAPI creates one ADB connection pool at process startup, stores it in
+  application state, and closes it at process shutdown. Each operation creates
+  its own Agent Memory client using that shared pool. The backend maps invalid
+  input to 400, out-of-scope threads to 404, and configuration, model, or
+  persistence failures to 503 without leaking credentials or internal errors.
 
 ## Dependencies and testing
 
 Add `langchain-oci` to `environment.yml` and the example backend requirements.
 Unit tests must mock the ADB/Agent Memory and LangChain OCI boundaries, proving
 thread ordering and truncation, ownership, model history construction,
-user/assistant persistence order, errors, and cleanup.
+user/assistant persistence order, one-pool-per-process lifecycle, errors, and
+cleanup.
 
 ## Frontend
 

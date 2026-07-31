@@ -37,6 +37,11 @@ Thread messages are durable short-term conversation state in the store selected
 by `MEMORY_STORE_ID`. Automatic Agent Memory extraction is disabled. ADB and
 OCI credentials never reach an API response.
 
+FastAPI creates one ADB connection pool when the backend process starts and
+reuses it across API requests. It closes the pool during graceful server
+shutdown; an Agent Memory client is still created for each operation using the
+shared pool.
+
 `user_id` scopes retrieval but is not authentication. A production backend
 must derive user and tenant identity from the authenticated principal rather
 than accepting a caller-controlled path value.

@@ -54,7 +54,7 @@ def test_get_chat_model_uses_configured_region_and_model(monkeypatch) -> None:
 
 
 def test_list_threads_returns_only_the_requested_recent_limit(monkeypatch) -> None:
-    """Expose no more than the requested ten newest populated threads."""
+    """Reuse one startup-created pool while exposing the newest ten threads."""
     activities = [
         SimpleNamespace(
             thread_id=f"thread-{index}",
@@ -63,14 +63,23 @@ def test_list_threads_returns_only_the_requested_recent_limit(monkeypatch) -> No
         )
         for index in range(12)
     ]
+    connection_pool = Mock()
+    memory = Mock()
+    pool_factory = Mock(return_value=connection_pool)
     monkeypatch.setattr(chatbot_app, "list_populated_threads", lambda *_: activities)
-    monkeypatch.setattr(chatbot_app, "with_memory", lambda callback: callback(Mock()))
+    monkeypatch.setattr(chatbot_app, "create_connection_pool", pool_factory)
+    monkeypatch.setattr(chatbot_app, "create_memory_store", lambda _pool: memory)
 
-    response = TestClient(chatbot_app.app).get("/api/users/user1/threads?limit=10")
+    with TestClient(chatbot_app.app) as client:
+        first_response = client.get("/api/users/user1/threads?limit=10")
+        response = client.get("/api/users/user1/threads?limit=10")
 
     assert response.status_code == 200
     assert len(response.json()) == 10
     assert response.json()[0]["thread_id"] == "thread-0"
+    assert first_response.status_code == 200
+    pool_factory.assert_called_once_with()
+    connection_pool.close.assert_called_once_with()
 
 
 def test_build_chat_prompt_keeps_context_and_question_separate() -> None:
@@ -103,9 +112,11 @@ def test_ask_question_uses_context_card_and_persists_messages(monkeypatch) -> No
     monkeypatch.setattr(chatbot_app, "create_memory_store", lambda _pool: memory)
     monkeypatch.setattr(chatbot_app, "get_chat_model", lambda: model)
 
-    response = TestClient(chatbot_app.app).post(
-        "/api/users/user1/threads/thread-1/questions", json={"question": "What color?"}
-    )
+    with TestClient(chatbot_app.app) as client:
+        response = client.post(
+            "/api/users/user1/threads/thread-1/questions",
+            json={"question": "What color?"},
+        )
 
     assert response.status_code == 200
     assert "event: token" in response.text
@@ -130,8 +141,12 @@ def test_resume_rejects_a_thread_owned_by_another_user(monkeypatch) -> None:
     thread.user_id = "other-user"
     memory = Mock()
     memory.get_thread.return_value = thread
-    monkeypatch.setattr(chatbot_app, "with_memory", lambda callback: callback(memory))
+    connection_pool = Mock()
+    monkeypatch.setattr(chatbot_app, "create_connection_pool", lambda: connection_pool)
+    monkeypatch.setattr(chatbot_app, "create_memory_store", lambda _pool: memory)
 
-    response = TestClient(chatbot_app.app).get("/api/users/user1/threads/thread-1")
+    with TestClient(chatbot_app.app) as client:
+        response = client.get("/api/users/user1/threads/thread-1")
 
     assert response.status_code == 404
+    connection_pool.close.assert_called_once_with()

@@ -37,6 +37,8 @@ All notable changes to this project are documented in this file.
 
 ### Changed
 
+* Reused one ADB connection pool for the Example 11 FastAPI process lifecycle
+  instead of creating and closing a pool for every chatbot request.
 * Moved shared populated-thread discovery and chatbot prompt construction into
   root-level `agent_memory.py` and `chat_prompts.py` modules, removing
   cross-example implementation dependencies.
